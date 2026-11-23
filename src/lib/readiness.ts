@@ -1,4 +1,4 @@
-export type ConnectorStatus = "ready" | "pending" | "partial";
+export type ConnectorStatus = "ready" | "pending" | "partial" | "declined";
 
 export type Connector = {
   id: string;
@@ -177,8 +177,8 @@ export const CONNECTORS: Connector[] = [
   {
     id: "adspirer-search-ads",
     name: "Adspirer Search Ads",
-    status: "pending",
-    detail: "Approve the auth prompt to finish",
+    status: "declined",
+    detail: "Skipped — not required for this workspace",
     category: "ads",
   },
   {
@@ -241,7 +241,11 @@ export const STACK = [
 ] as const;
 
 export function readinessScore(connectors: Connector[] = CONNECTORS) {
-  const weight = { ready: 1, partial: 0.6, pending: 0 } as const;
-  const total = connectors.reduce((sum, c) => sum + weight[c.status], 0);
-  return Math.round((total / connectors.length) * 100);
+  // Declined connectors are excluded from coverage so skipping optional auth
+  // does not penalize the workspace score.
+  const counted = connectors.filter((c) => c.status !== "declined");
+  const weight = { ready: 1, partial: 0.6, pending: 0, declined: 0 } as const;
+  if (counted.length === 0) return 0;
+  const total = counted.reduce((sum, c) => sum + weight[c.status], 0);
+  return Math.round((total / counted.length) * 100);
 }

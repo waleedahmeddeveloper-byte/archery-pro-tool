@@ -15,12 +15,14 @@ const statusLabel: Record<ConnectorStatus, string> = {
   ready: "Ready",
   partial: "Partial",
   pending: "Needs auth",
+  declined: "Declined",
 };
 
 export default function Home() {
   const score = readinessScore();
   const readyCount = CONNECTORS.filter((c) => c.status === "ready").length;
   const pendingCount = CONNECTORS.filter((c) => c.status === "pending").length;
+  const declinedCount = CONNECTORS.filter((c) => c.status === "declined").length;
   const skillGroups = ["apps", "agents", "ops"] as const;
   const groupTitle = {
     apps: "Published apps",
@@ -87,7 +89,8 @@ export default function Home() {
             <Progress value={score} className="mt-4 h-2 max-w-md" />
             <p className="mt-3 text-sm text-muted-foreground">
               {readyCount} ready · {CONNECTORS.filter((c) => c.status === "partial").length}{" "}
-              partial · {pendingCount} awaiting your auth approval
+              partial · {pendingCount} awaiting auth
+              {declinedCount > 0 ? ` · ${declinedCount} declined` : ""}
             </p>
           </div>
           <div>
@@ -121,8 +124,8 @@ export default function Home() {
                 Connectors
               </h2>
               <p className="mt-2 max-w-2xl text-sm text-muted-foreground sm:text-base">
-                Approve any remaining auth prompts in Cursor to bring the last
-                services online. Google Workspace, X, and Crustdata are ready.
+                Google Workspace, X, and Crustdata are ready. Adspirer Search Ads
+                was declined; only X Ads remains optional.
               </p>
             </div>
           </div>
