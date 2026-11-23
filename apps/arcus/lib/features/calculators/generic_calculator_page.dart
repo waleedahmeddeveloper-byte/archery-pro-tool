@@ -48,8 +48,9 @@ class _GenericCalculatorPageState extends State<GenericCalculatorPage> {
   double _d(String key) => parseDouble(_fields[key]!.text) ?? double.nan;
 
   void _reset() {
-    for (final e in _defaultFields(widget.calcId).entries) {
-      _fields[e.key]?.text = e.value.text;
+    final defaults = _defaultFieldValues(widget.calcId);
+    for (final e in defaults.entries) {
+      _fields[e.key]?.text = e.value;
     }
     setState(() {
       _result = null;
@@ -272,6 +273,7 @@ class _GenericCalculatorPageState extends State<GenericCalculatorPage> {
       case 'drop':
       case 'trajectory':
       case 'xbow-trajectory':
+        final sight = _fields.containsKey('sight') ? _d('sight') : 3.5;
         final r = _d('drag') > 0
             ? _engine.trajectoryWithDrag(
                 speedFps: _d('speed'),
@@ -281,6 +283,7 @@ class _GenericCalculatorPageState extends State<GenericCalculatorPage> {
             : _engine.trajectoryGravity(
                 speedFps: _d('speed'),
                 zeroYards: _d('zero'),
+                sightHeightInches: sight,
               );
         return (r, 'Trajectory table', _dropChart(r.value));
       case 'sight-pin':
@@ -774,6 +777,7 @@ class _GenericCalculatorPageState extends State<GenericCalculatorPage> {
         'letoff' => 'Let-off %',
         'zero' => 'Zero distance',
         'drag' => 'Drag factor /s',
+        'sight' => 'Sight height',
         'peep' => 'Peep to sight',
         'los' => 'Line-of-sight distance',
         'angle' => 'Angle',
@@ -817,6 +821,7 @@ class _GenericCalculatorPageState extends State<GenericCalculatorPage> {
         'zero' || 'los' || 'dist' => 'yd',
         'angle' => '°',
         'drag' => '/s',
+        'sight' => 'in',
         'vaneCount' => null,
         _ => null,
       };
@@ -830,17 +835,16 @@ class _GenericCalculatorPageState extends State<GenericCalculatorPage> {
       };
 }
 
-_FieldMap _defaultFields(String id) {
-  Map<String, String> raw;
+Map<String, String> _defaultFieldValues(String id) {
   switch (id) {
     case 'foc':
     case 'balance':
-      raw = {'length': '29', 'balance': '18.2'};
+      return {'length': '29', 'balance': '18.2'};
     case 'foc-components':
     case 'component-builder':
     case 'arrow-weight':
     case 'component-weight':
-      raw = {
+      return {
         'gpi': '8.5',
         'length': '28',
         'point': '125',
@@ -853,17 +857,17 @@ _FieldMap _defaultFields(String id) {
         'draw': '60',
       };
     case 'gpi':
-      raw = {'gpi': '8.5', 'length': '28'};
+      return {'gpi': '8.5', 'length': '28'};
     case 'arrow-length':
-      raw = {'drawLen': '28'};
+      return {'drawLen': '28'};
     case 'point-weight':
-      raw = {'point': '125', 'insert': '50'};
+      return {'point': '125', 'insert': '50'};
     case 'gpp':
-      raw = {'total': '420', 'draw': '60'};
+      return {'total': '420', 'draw': '60'};
     case 'point-foc':
-      raw = {'length': '29', 'total': '420', 'foc': '10', 'targetFoc': '14'};
+      return {'length': '29', 'total': '420', 'foc': '10', 'targetFoc': '14'};
     case 'ibo-speed':
-      raw = {
+      return {
         'ibo': '335',
         'draw': '60',
         'drawLen': '28',
@@ -871,21 +875,21 @@ _FieldMap _defaultFields(String id) {
         'string': '0',
       };
     case 'speed-mass':
-      raw = {
+      return {
         'refSpeed': '300',
         'refWeight': '350',
         'newWeight': '450',
         'eff': '95',
       };
     case 'fps-mph':
-      raw = {'fps': '280'};
+      return {'fps': '280'};
     case 'draw-weight':
-      raw = {'drawLen': '28'};
+      return {'drawLen': '28'};
     case 'draw-length':
-      raw = {'wingspan': '70'};
+      return {'wingspan': '70'};
     case 'bow-efficiency':
     case 'stored-energy':
-      raw = {
+      return {
         'draw': '70',
         'drawLen': '29',
         'weight': '420',
@@ -894,26 +898,26 @@ _FieldMap _defaultFields(String id) {
         'letoff': '80',
       };
     case 'let-off':
-      raw = {'draw': '70', 'letoff': '80'};
+      return {'draw': '70', 'letoff': '80'};
     case 'ke-momentum':
     case 'ke':
     case 'momentum':
     case 'xbow-ke':
     case 'xbow-momentum':
-      raw = {'weight': '420', 'speed': '280'};
+      return {'weight': '420', 'speed': '280'};
     case 'drop':
     case 'trajectory':
     case 'xbow-trajectory':
-      raw = {'speed': '280', 'zero': '20', 'drag': '0'};
+      return {'speed': '280', 'zero': '20', 'drag': '0', 'sight': '3.5'};
     case 'sight-pin':
-      raw = {'speed': '280', 'zero': '20', 'peep': '28'};
+      return {'speed': '280', 'zero': '20', 'peep': '28'};
     case 'shot-angle':
     case 'distance-comp':
-      raw = {'los': '40', 'angle': '30'};
+      return {'los': '40', 'angle': '30'};
     case 'velocity-loss':
-      raw = {'speed': '280', 'dist': '40', 'drag': '0.08'};
+      return {'speed': '280', 'dist': '40', 'drag': '0.08'};
     case 'downrange':
-      raw = {'speed': '280', 'weight': '420', 'drag': '0.08'};
+      return {'speed': '280', 'weight': '420', 'drag': '0.08'};
     case 'spine':
     case 'dynamic-spine':
     case 'spine-assistant':
@@ -923,15 +927,15 @@ _FieldMap _defaultFields(String id) {
     case 'point-adj':
     case 'length-adj':
     case 'cam-adj':
-      raw = {'draw': '55', 'length': '28', 'point': '125'};
+      return {'draw': '55', 'length': '28', 'point': '125'};
     case 'static-spine':
     case 'spine-chart':
-      raw = {};
+      return {};
     case 'xbow-speed':
     case 'xbow-ballistics':
-      raw = {'ratedSpeed': '400', 'ratedWeight': '400', 'yourWeight': '450'};
+      return {'ratedSpeed': '400', 'ratedWeight': '400', 'yourWeight': '450'};
     case 'xbow-weight':
-      raw = {
+      return {
         'shaft': '250',
         'point': '100',
         'nock': '10',
@@ -940,12 +944,16 @@ _FieldMap _defaultFields(String id) {
         'draw': '150',
       };
     case 'xbow-guide':
-      raw = {'ratedSpeed': '400', 'draw': '150'};
+      return {'ratedSpeed': '400', 'draw': '150'};
     case 'converter':
-      raw = {'kind': 'weight', 'value': '450'};
+      return {'kind': 'weight', 'value': '450'};
     default:
-      raw = {};
+      return {};
   }
+}
+
+_FieldMap _defaultFields(String id) {
+  final raw = _defaultFieldValues(id);
   return {
     for (final e in raw.entries) e.key: TextEditingController(text: e.value),
   };
