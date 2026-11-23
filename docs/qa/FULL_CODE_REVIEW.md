@@ -1,120 +1,92 @@
-# Full code review — Arcus
+# Full code review — Arcus (updated)
 
-**Date:** 2026-11-23  
+**Date:** 2026-11-23 (follow-up)  
 **Repo:** `waleedahmeddeveloper-byte/archery-pro-tool`  
-**Scope:** Entire monorepo (`apps/arcus`, `packages/archery_engine`, configs, dist/docs).  
-**Method:** Static review + `dart analyze` / `flutter analyze` + unit/widget tests. No guess for unverified items.
+**Scope:** Entire monorepo after integration/widget tests, coverage gate, signing docs, sync API client, iOS checklist.  
+**Method:** Static review + `dart analyze` / `flutter analyze` + unit/widget + Linux integration tests + lcov. No guess for unverified items.
 
 ---
 
-## 1. File download code (in-app)
+## Coverage (measured)
 
-**Finding (verified):** There is **no in-app file-download implementation**.
+| Package | Lines hit | Total | % | Target |
+| --- | --- | --- | --- | --- |
+| `packages/archery_engine` | 645 | 662 | **97.4%** | ≥95% — **met** (CI gate in `.github/workflows/ci.yml`) |
+| `apps/arcus` | 631 | 1435 | **44.0%** | No hard gate (UI surface is large); widget + integration cover main flows |
 
-| Check | Result |
+---
+
+## Test results (this pass)
+
+| Suite | Result |
 | --- | --- |
-| `http` / `dio` / `HttpClient` / download APIs in Dart | **None found** (`rg` over `apps/arcus`) |
-| Scoped storage / iOS sandbox download paths | **N/A** — no download module |
-| Progress / pause / resume / cancel / retry | **N/A** |
-| APK distribution | **Outside the app** — GitHub `dist/arcus-android.zip` + Releases (see `DOWNLOAD.md`) |
-
-Privacy/sync copy previously implied downloads; copy was corrected to match mock sync (no network).
-
-**Android INTERNET:** present only in `debug`/`profile` manifests (Flutter tooling). **Main/release manifest has no INTERNET permission** (verified in `android/app/src/main/AndroidManifest.xml`) — appropriate for offline-first calculators.
+| `packages/archery_engine` `dart analyze` | Pass (0 issues) |
+| `packages/archery_engine` `dart test` | **53 passed** |
+| `apps/arcus` `flutter analyze` | Pass (0 issues) |
+| `apps/arcus` `flutter test` | **10 passed** (onboarding smoke, scaffold Calculate/Reset/Copy, FOC/GPP/unknown calc, profile + sync client) |
+| `apps/arcus` `integration_test/app_flows_test.dart` (-d linux) | **4 passed**: onboarding, skip→offline home, Setup Assistant 5 steps + save profile, search empty + one calc per category |
+| iOS build / Xcode | **Not run** (no macOS) — see `docs/ios/IOS_RELEASE_CHECKLIST.md` |
+| Android release keystore | Configured via `key.properties` when present; secrets **not** committed |
 
 ---
 
-## 2. Prioritized issues
+## 1. Prioritized issues
 
 ### Critical
 
-| ID | Issue | File:line | Cause | Fix |
-| --- | --- | --- | --- | --- |
-| — | None verified | — | — | — |
+| ID | Issue | File:line | Cause | Fix | Status |
+| --- | --- | --- | --- | --- | --- |
+| — | None verified | — | — | — | — |
 
 ### High
 
 | ID | Issue | File:line | Cause | Fix | Status |
 | --- | --- | --- | --- | --- | --- |
-| H1 | GPP could show NaN/Infinity | `generic_calculator_page.dart` (GPP case) | Inline `total/draw` skipped engine validation | Route through `ArcheryEngine.grainsPerPound` → `calculateGppResult` | **Fixed** |
-| H2 | Point FOC accepted NaN percents | `point_foc.dart:14-15` | Only length/mass validated | `requireFiniteNumber` on FOC % inputs | **Fixed** |
-| H3 | Release build uses debug signing | `android/app/build.gradle.kts` release `signingConfig` | Placeholder for local release | Needs owner keystore (`key.properties`) — **not auto-fixed** (needs secrets) | Open |
+| H1 | GPP could show NaN/Infinity | `generic_calculator_page.dart` | Inline division | Route through engine `grainsPerPound` | **Fixed** (prior) |
+| H2 | Point FOC accepted NaN percents | `point_foc.dart` | Missing finite checks | `requireFiniteNumber` | **Fixed** (prior) |
+| H3 | Release APK unsigned / debug-signed without owner keystore | `android/app/build.gradle.kts` | No secrets in repo | Reads `android/key.properties`; docs in `docs/android/RELEASE_SIGNING.md`; debug fallback for CI only | **Mitigated** — owner must supply keystore before Play upload |
+| H4 | Content API host is placeholder | `content_api_client.dart` `kArcusApiBase` | Website API not live | OpenAPI at `docs/api/openapi.yaml`; client has retry/backoff + disk cache offline fallback; override via `--dart-define=ARCUS_API_BASE=` | **Open** (blocked on website deploy) |
 
 ### Medium
 
 | ID | Issue | File:line | Cause | Fix | Status |
 | --- | --- | --- | --- | --- | --- |
-| M1 | Setup Assistant “Done” no-op | `setup_assistant_page.dart` Done button | Only advanced when `_step < 4` | `context.go('/')` on final step | **Fixed** |
-| M2 | Onboarding promised saved profiles | `app_strings.dart`, `home_tab.dart`, `privacy_page.dart` | Marketing ahead of features | Copy aligned to Assistant + offline reality | **Fixed** |
-| M3 | GoRouter hit SharedPreferences every nav | `app_router.dart` redirect | Async prefs each redirect | `OnboardingGate` cache | **Fixed** |
-| M4 | Unused deps / `generate: true` without l10n | `pubspec.yaml` | Dead `uuid`/`intl`/`collection`/`meta`/`flutter_localizations` | Removed unused; `generate: false` | **Fixed** |
-| M5 | Calculators search had no empty state | `calculators_tab.dart` | No `filtered.isEmpty` UI | Empty search message | **Fixed** |
-| M6 | Unused imports | `crossbow.dart`, `downrange.dart` | `units.dart` unused | Removed | **Fixed** |
-| M7 | Duplicate catalog tools share one runner | `calculator_catalog.dart` | Overlapping IDs (foc/balance, spine-adj, …) | Documented; behavior OK | Open (product) |
-| M8 | Sync UI implies network | `sync_status_provider.dart` | Mock delay only | Message says mock / no network | **Fixed** |
+| M1 | Setup Assistant Done no-op | `setup_assistant_page.dart` | Step guard | `context.go('/')` | **Fixed** |
+| M2 | Marketing ahead of profile feature | onboarding/home/privacy | Copy drift | Aligned + `RigProfileStore` | **Fixed** |
+| M3 | Prefs hit every GoRouter redirect | `onboarding_gate.dart` | Async prefs | Cache | **Fixed** |
+| M4 | Sync was mock-only | `sync_status_provider.dart` | Stub delay | Real `ContentApiClient` + OpenAPI | **Fixed** |
+| M5 | Calculators search empty state | `calculators_tab.dart` | Missing UI | Empty message | **Fixed** |
+| M6 | App line coverage ~44% | `apps/arcus/lib` | Large UI / routes | Integration + widget cover critical paths; raise later with more widget tests | Open |
+| M7 | Duplicate catalog IDs share runners | `calculator_catalog.dart` | Overlapping product entries | Documented; behavior OK | Open (product) |
+| M8 | Main manifest now has INTERNET | `AndroidManifest.xml` | Needed for content sync | Keep; sync fails soft to offline cache | Accepted |
 
 ### Low
 
 | ID | Issue | File:line | Cause | Fix | Status |
 | --- | --- | --- | --- | --- | --- |
-| L1 | Application ID placeholder | `build.gradle.kts` `com.arcus.arcus` | Scaffold default | Owner should set Play ID | Open |
-| L2 | No integration / golden tests | `apps/arcus/test` | Only 1 widget smoke | Expand later | Open |
-| L3 | Catalog lists rebuild full `ListView` children | `calculators_tab.dart` | ~50 items — fine for now | Lazy `ListView.builder` if catalog grows | Open |
-| L4 | `material_ui` wrapper vs `flutter/material` | throughout | Extra dep | Keep unless migrating | Open |
-| L5 | Accessibility: limited Semantics | lists / charts | No explicit labels on charts | Future a11y pass | Open (unverified beyond visual) |
-| L6 | Coverage % | — | No `lcov` run in CI | Coverage tool not run this session — **not quantified** | Unverified |
+| L1 | Application ID `com.arcus.arcus` | `build.gradle.kts` | Scaffold default | Owner sets Play/App Store ID | Open |
+| L2 | Catalog ListView eager children | `calculators_tab.dart` | ~50 items | `ListView.builder` if catalog grows | Open |
+| L3 | `material_ui` wrapper | throughout | Extra dep | Keep unless migrating | Open |
+| L4 | Limited Semantics on charts | FOC visual / lists | No explicit labels | Future a11y pass | Open |
+| L5 | Integration search needs TextField focus after nav tap | `app_flows_test.dart` | NavBar tap steals focus; `enterText` no-op | Tests tap field before `enterText` | **Fixed** (test harness) |
+| L6 | iOS PrivacyInfo.xcprivacy not authored here | `ios/Runner` | No macOS/Xcode | Checklist in `docs/ios/IOS_RELEASE_CHECKLIST.md` | Open (Mac required) |
 
 ---
 
-## 3. Lists audit
+## 2. Deliverables from this follow-up
 
-| List | Pagination | Lazy load | Empty | Loading | Error | Search/filter | Notes |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| Calculators tab | N/A (static ~49) | No (eager children) | **Added** | N/A (sync data) | N/A | Search title/subtitle | OK for size |
-| Home featured | Take 6 | SliverList | N/A | N/A | N/A | No | OK |
-| Library guides | Static 6 | Eager | N/A | N/A | N/A | No | OK |
-| More settings | Static | Eager | N/A | Sync subtitle | Mock only | No | OK |
-| Assistant steps | PageView | Eager | N/A | N/A | Validation text | No | Done fixed |
-| Calculator results | Nested lists | Eager | No result until Calculate | N/A | Error string | Related chips | OK |
-
-No infinite scroll or remote lists exist (verified).
+1. **Integration tests** — onboarding, offline home, Setup Assistant (5 steps) + save profile, search + one calculator per category  
+2. **Widget tests** — `CalculatorScaffold` Calculate/Reset; `ResultBreakdown` Copy; `GenericCalculatorPage` validation / Calculate / Reset / Copy / errors  
+3. **Coverage** — engine **97.4%** (CI ≥95%); app **44.0%** reported  
+4. **Release signing** — Gradle reads `key.properties` (gitignored); `key.properties.example` + `docs/android/RELEASE_SIGNING.md`  
+5. **Sync** — `ContentApiClient` (HTTPS, retry/backoff, disk cache, offline fallback) + `docs/api/openapi.yaml`  
+6. **iOS** — `docs/ios/IOS_RELEASE_CHECKLIST.md` (signing, Info.plist, ATT, privacy manifest)
 
 ---
 
-## 4. Testing
+## 3. Remaining risks
 
-| Suite | Result |
-| --- | --- |
-| `packages/archery_engine` `dart analyze` | Pass (0 issues after fixes) |
-| `packages/archery_engine` `dart test` | **25 passed** (was 21; +GPP + FOC NaN) |
-| `apps/arcus` `flutter analyze` | Pass |
-| `apps/arcus` `flutter test` | **1 passed** (onboarding smoke) |
-| Integration tests | **None present** — cannot report |
-| Coverage % | **Not measured** this session |
-| iOS build / Xcode warnings | **Not run** (no macOS in this environment) |
-| Android `flutter build apk` | Previously succeeded; not re-run this review pass |
-
----
-
-## 5. Changes applied this review
-
-1. `calculateGppResult` + `ArcheryEngine.grainsPerPound`; GPP UI uses engine  
-2. `requireFiniteNumber` + FOC % validation in `point_foc.dart`  
-3. Setup Assistant Done → home  
-4. Onboarding/home/privacy copy corrected  
-5. `OnboardingGate` prefs cache  
-6. Calculators empty search UI  
-7. Removed unused pubspec deps; `generate: false`  
-8. Removed unused engine imports  
-9. Sync mock message clarified  
-10. Engine tests for GPP + NaN FOC  
-
----
-
-## 6. Remaining risks
-
-- Store release still **debug-signed** until keystore is configured.  
-- No live sync / ads — stubs only.  
-- Spine “adjustment” catalog entries do not show isolated deltas.  
-- Single widget test — low UI regression coverage.  
-- iOS IPA / ATT / store compliance **not verified** here.
+- Store release stays **debug-signed** until the owner adds a real keystore via `key.properties`.  
+- Live content sync needs a website implementing `docs/api/openapi.yaml` and `ARCUS_API_BASE`.  
+- iOS IPA / ATT / Privacy Manifest **must** be completed on a Mac.  
+- App coverage is modest outside the exercised flows; expand widget tests for More/Library/theme if raising the bar.

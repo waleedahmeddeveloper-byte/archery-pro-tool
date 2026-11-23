@@ -2,6 +2,8 @@ import 'package:archery_engine/archery_engine.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:go_router/go_router.dart';
 
+import '../profile/rig_profile.dart';
+
 class SetupAssistantPage extends StatefulWidget {
   const SetupAssistantPage({super.key});
 
@@ -11,10 +13,12 @@ class SetupAssistantPage extends StatefulWidget {
 
 class _SetupAssistantPageState extends State<SetupAssistantPage> {
   final _page = PageController();
+  final _store = RigProfileStore();
   int _step = 0;
 
   BowType bowType = BowType.compound;
   CamStyle camStyle = CamStyle.standard;
+  final profileName = TextEditingController(text: 'Hunting rig');
   final drawWeight = TextEditingController(text: '60');
   final drawLength = TextEditingController(text: '28');
   final ibo = TextEditingController(text: '335');
@@ -29,8 +33,85 @@ class _SetupAssistantPageState extends State<SetupAssistantPage> {
   final vane = TextEditingController(text: '6');
   String summary = '';
   String? error;
+  String? profileStatus;
 
   final engine = const ArcheryEngine();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfile();
+  }
+
+  @override
+  void dispose() {
+    _page.dispose();
+    profileName.dispose();
+    drawWeight.dispose();
+    drawLength.dispose();
+    ibo.dispose();
+    letOff.dispose();
+    gpi.dispose();
+    shaftLen.dispose();
+    point.dispose();
+    insert.dispose();
+    collar.dispose();
+    nock.dispose();
+    wrap.dispose();
+    vane.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadProfile() async {
+    final p = await _store.load();
+    if (p == null || !mounted) return;
+    setState(() {
+      profileName.text = p.name;
+      bowType = p.bowType;
+      camStyle = p.camStyle;
+      drawWeight.text = p.drawWeightPounds.toString();
+      drawLength.text = p.drawLengthInches.toString();
+      ibo.text = p.iboFps.toString();
+      letOff.text = p.letOffPercent.toString();
+      gpi.text = p.gpi.toString();
+      shaftLen.text = p.shaftLengthInches.toString();
+      point.text = p.pointGrains.toString();
+      insert.text = p.insertGrains.toString();
+      collar.text = p.collarGrains.toString();
+      nock.text = p.nockGrains.toString();
+      wrap.text = p.wrapGrains.toString();
+      vane.text = p.vaneGrainsEach.toString();
+      profileStatus = 'Loaded saved profile “${p.name}”.';
+    });
+  }
+
+  Future<void> _saveProfile() async {
+    try {
+      final profile = RigProfile(
+        name: profileName.text.trim().isEmpty ? 'Saved rig' : profileName.text.trim(),
+        bowType: bowType,
+        camStyle: camStyle,
+        drawWeightPounds: double.parse(drawWeight.text),
+        drawLengthInches: double.parse(drawLength.text),
+        iboFps: double.parse(ibo.text),
+        letOffPercent: double.parse(letOff.text),
+        gpi: double.parse(gpi.text),
+        shaftLengthInches: double.parse(shaftLen.text),
+        pointGrains: double.parse(point.text),
+        insertGrains: double.parse(insert.text),
+        collarGrains: double.parse(collar.text),
+        nockGrains: double.parse(nock.text),
+        wrapGrains: double.parse(wrap.text),
+        vaneGrainsEach: double.parse(vane.text),
+      );
+      await _store.save(profile);
+      if (!mounted) return;
+      setState(() => profileStatus = 'Saved profile “${profile.name}”.');
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => profileStatus = 'Could not save: $e');
+    }
+  }
 
   void _buildSummary() {
     try {
@@ -120,6 +201,20 @@ Assumptions: IBO→speed is an estimate; FOC here is component-based — measure
                   '1. Bow configuration',
                   Column(
                     children: [
+                      TextField(
+                        controller: profileName,
+                        decoration: const InputDecoration(labelText: 'Profile name'),
+                      ),
+                      if (profileStatus != null) ...[
+                        const SizedBox(height: 8),
+                        Text(profileStatus!),
+                      ],
+                      Row(
+                        children: [
+                          TextButton(onPressed: _loadProfile, child: const Text('Load saved')),
+                          TextButton(onPressed: _saveProfile, child: const Text('Save profile')),
+                        ],
+                      ),
                       DropdownButtonFormField<BowType>(
                         initialValue: bowType,
                         items: const [
@@ -196,6 +291,15 @@ Assumptions: IBO→speed is an estimate; FOC here is component-based — measure
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      FilledButton.tonal(
+                        onPressed: _saveProfile,
+                        child: const Text('Save profile'),
+                      ),
+                      if (profileStatus != null) ...[
+                        const SizedBox(height: 8),
+                        Text(profileStatus!),
+                      ],
+                      const SizedBox(height: 12),
                       const Text('Open detailed calculators (same formulas, more charts and FAQs):'),
                       TextButton(onPressed: () => context.push('/calc/foc'), child: const Text('Measure FOC (AMO)')),
                       TextButton(onPressed: () => context.push('/calc/ke-momentum'), child: const Text('KE & momentum')),

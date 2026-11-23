@@ -27,3 +27,7 @@ android/key.properties
 dist/*
 !dist/README.md
 !dist/arcus-android.zip
+**/coverage/
+apps/arcus/android/key.properties
+*.jks
+*.keystore

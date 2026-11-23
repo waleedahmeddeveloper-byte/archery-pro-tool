@@ -1,17 +1,21 @@
 openapi: 3.0.3
 info:
   title: Arcus Content Sync API
-  version: 1.0.0
+  version: 1.1.0
   description: >
     Versioned content feed for Arcus mobile clients. The website implements this
-    contract; the app ships with bundled offline content and optional pull sync.
+    contract; the app ships with bundled offline content and pulls updates via
+    HTTPS with disk cache + retry/backoff. Set ARCUS_API_BASE at build time.
 servers:
   - url: https://api.example.com/v1
-    description: Replace with production host
+    description: Replace with production host (must be HTTPS)
+  - url: http://127.0.0.1:8787/v1
+    description: Local mock for development only
 paths:
   /manifest:
     get:
       summary: Content manifest with versions
+      operationId: getManifest
       parameters:
         - in: query
           name: since
@@ -19,16 +23,27 @@ paths:
             type: string
             format: date-time
           required: false
+          description: ISO-8601 timestamp; clients may send last successful sync time
       responses:
         "200":
           description: Manifest
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+              description: Recommended `public, max-age=300`
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Manifest"
+        "304":
+          description: Not modified (optional If-None-Match support)
+        "5XX":
+          description: Server error — clients retry with exponential backoff then use cache
   /guides:
     get:
       summary: Educational guides
+      operationId: listGuides
       parameters:
         - in: query
           name: updated_since
@@ -42,6 +57,7 @@ paths:
             application/json:
               schema:
                 type: object
+                required: [items]
                 properties:
                   items:
                     type: array
@@ -50,6 +66,7 @@ paths:
   /spine-charts:
     get:
       summary: Planning spine chart updates
+      operationId: listSpineCharts
       responses:
         "200":
           description: Chart payloads
@@ -57,6 +74,7 @@ paths:
             application/json:
               schema:
                 type: object
+                required: [items]
                 properties:
                   items:
                     type: array
@@ -65,6 +83,7 @@ paths:
   /announcements:
     get:
       summary: In-app announcements
+      operationId: listAnnouncements
       responses:
         "200":
           description: Announcements
@@ -72,6 +91,7 @@ paths:
             application/json:
               schema:
                 type: object
+                required: [items]
                 properties:
                   items:
                     type: array

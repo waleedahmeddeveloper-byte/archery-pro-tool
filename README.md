@@ -52,16 +52,22 @@ flutter build appbundle --release
 # APK: flutter build apk --release
 ```
 
-Configure signing in `android/key.properties` (not committed).
+Release signing: copy `android/key.properties.example` → `android/key.properties` (gitignored). Steps: [docs/android/RELEASE_SIGNING.md](./docs/android/RELEASE_SIGNING.md).
 
 ### iOS release
 
 ```bash
 cd apps/arcus
-flutter build ipa --release
+flutter build ipa --release   # requires macOS + Xcode
 ```
 
-Open `ios/Runner.xcworkspace` in Xcode for signing, capabilities (ATT when ads enabled), and TestFlight upload.
+Checklist (signing, Info.plist, ATT, privacy manifest): [docs/ios/IOS_RELEASE_CHECKLIST.md](./docs/ios/IOS_RELEASE_CHECKLIST.md).
+
+### Content sync API
+
+OpenAPI contract: [docs/api/openapi.yaml](./docs/api/openapi.yaml).  
+App client: `ContentApiClient` with HTTPS, retry/backoff, disk cache, offline fallback.  
+Override base URL: `--dart-define=ARCUS_API_BASE=https://your-api/v1`.
 
 ## Architecture
 

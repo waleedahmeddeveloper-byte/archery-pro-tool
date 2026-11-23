@@ -10,11 +10,25 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: dart-lang/setup-dart@v1
-      - name: Engine tests
+      - name: Engine tests + coverage
         working-directory: packages/archery_engine
         run: |
           dart pub get
-          dart test
+          dart test --coverage=coverage
+          dart pub global activate coverage
+          export PATH="$PATH:$HOME/.pub-cache/bin"
+          format_coverage --lcov --in=coverage --out=coverage/lcov.info --report-on=lib
+          python3 - <<'PY'
+          from pathlib import Path
+          lf=lh=0
+          for line in Path('coverage/lcov.info').read_text().splitlines():
+            if line.startswith('LF:'): lf+=int(line[3:])
+            elif line.startswith('LH:'): lh+=int(line[3:])
+          pct=100*lh/max(lf,1)
+          print(f'engine coverage {pct:.1f}% ({lh}/{lf})')
+          if pct < 95:
+            raise SystemExit(f'Engine coverage {pct:.1f}% < 95%')
+          PY
 
   flutter:
     runs-on: ubuntu-latest
@@ -29,3 +43,4 @@ jobs:
           flutter pub get
           flutter analyze
           flutter test
+          flutter test integration_test/app_flows_test.dart -d flutter-tester || flutter test integration_test/app_flows_test.dart -d linux

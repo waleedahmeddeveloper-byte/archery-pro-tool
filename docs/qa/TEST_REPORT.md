@@ -1,38 +1,41 @@
-# Arcus QA report
+# Test report — Arcus
 
-## Scope
+**Date:** 2026-11-23
 
-Offline Flutter app (`apps/arcus`) + pure-Dart engine (`packages/archery_engine`).
+## Commands
 
-## Automated
+```bash
+# Engine
+cd packages/archery_engine && dart analyze && dart test --coverage=coverage
+format_coverage --lcov --in=coverage --out=coverage/lcov.info --report-on=lib
 
-| Suite | Result |
+# App
+cd apps/arcus && flutter analyze && flutter test --coverage
+flutter test integration_test/app_flows_test.dart -d linux
+```
+
+## Results
+
+| Suite | Pass |
 | --- | --- |
-| `packages/archery_engine` `dart test` | Pass (21 cases): FOC, KE/momentum, weight/GPP, speed, draw length, spine, trajectory, converters, let-off, shot angle, crossbow, bow energy, sight pin, point FOC |
-| `apps/arcus` `flutter analyze` | Pass (no issues) |
-| `apps/arcus` widget smoke | Onboarding loads when unseen |
+| Engine analyze | 0 issues |
+| Engine unit | 53 |
+| App analyze | 0 issues |
+| App unit/widget | 10 |
+| App integration (linux) | 4 |
 
-## Manual / product coverage
+## Coverage
 
-- Full calculator catalog (50+ tools) routed via `/calc/:id` with shared scaffold: breadcrumb, intro, inputs, calculate/reset/copy, formula, steps, assumptions, limitations, safety, citation, FAQ/examples when defined, related tools.
-- Setup Assistant 5-step workflow: bow → shaft → components → performance → related tools.
-- FOC balance diagram (2D with cylindrical shading).
-- Trajectory / drop charts via `fl_chart`.
-- Light (spruce/brass) and dark navy themes.
-- Ads stub (`AdService.adsEnabled = false`) ready for AdMob/AdSense later.
-- Website sync contract in `docs/api/openapi.yaml` (mock status in-app).
+| Target | % |
+| --- | --- |
+| Engine (`lib/`) | **97.4%** (645/662) |
+| App (`lib/`) | **44.0%** (631/1435) |
 
-## Known limitations (honest)
+## Integration coverage map
 
-- Spine charts are **Arcus planning bands**, not reproduced manufacturer charts.
-- IBO→speed, drag trajectory, and sight-pin gaps are **labeled estimates**.
-- Component FOC ≠ measured AMO FOC — both are offered separately.
-- Crossbow guidance never overrides the owner’s manual minimum bolt weight.
-- No claim of “zero bugs” in production; continue chronograph and paper-tune validation.
-- Release APK may be debug-signed until store keystores are configured.
-- iOS IPA requires macOS + Apple signing (not produced in this Linux CI environment).
-
-## Ads / monetization readiness
-
-- Abstraction in place; Google Mobile Ads SDK not linked yet (keeps APK builds reliable).
-- When enabling: production AdMob unit IDs, UMP/ATT consent, and store privacy disclosures.
+| Flow | Test |
+| --- | --- |
+| Onboarding → home | `onboarding then offline home launch` |
+| Skip → offline home | `skip onboarding reaches home offline` |
+| Setup Assistant steps 1–5 + save profile | `Setup Assistant 5 steps + save/load profile` |
+| Search empty + FOC / Draw Length / KE / Spine / Crossbow / Unit Converter | `search and one calculator per category` |

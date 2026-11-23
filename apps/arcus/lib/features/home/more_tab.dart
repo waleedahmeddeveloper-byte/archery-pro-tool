@@ -41,8 +41,13 @@ class MoreTab extends ConsumerWidget {
           ListTile(
             title: const Text('Content sync'),
             subtitle: Text(
-              sync.lastUpdatedLabel ?? 'Using bundled offline content',
+              [
+                sync.message ?? 'Using bundled offline content',
+                if (sync.lastUpdatedLabel != null) 'Updated ${sync.lastUpdatedLabel}',
+                if (sync.error != null) sync.error!,
+              ].join('\n'),
             ),
+            isThreeLine: true,
             trailing: TextButton(
               onPressed: () => ref.read(syncStatusProvider.notifier).refresh(),
               child: const Text('Refresh'),
