@@ -42,7 +42,10 @@ flutter run -d linux   # or chrome / android / ios
 
 ### Android release
 
-Prebuilt APK: [v0.1.0 release](https://github.com/waleedahmeddeveloper-byte/archery-pro-tool/releases/tag/v0.1.0) (`arcus-release.apk`).
+**Download Android build (v0.1.1):**
+- Phone-friendly ZIP: [arcus-android-v0.1.1.zip](https://github.com/waleedahmeddeveloper-byte/archery-pro-tool/releases/download/v0.1.1/arcus-android-v0.1.1.zip) (unzip → install `arcus-release.apk`)
+- Direct APK: [arcus-release.apk](https://github.com/waleedahmeddeveloper-byte/archery-pro-tool/releases/download/v0.1.1/arcus-release.apk)
+- Release page: [v0.1.1](https://github.com/waleedahmeddeveloper-byte/archery-pro-tool/releases/tag/v0.1.1)
 
 ```bash
 cd apps/arcus
