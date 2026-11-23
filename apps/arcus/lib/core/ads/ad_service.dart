@@ -1,7 +1,8 @@
-import 'package:flutter/foundation.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
-
 /// Abstraction so AdMob can be enabled later without refactoring screens.
+///
+/// The google_mobile_ads package is intentionally not linked in this build so
+/// APK generation stays reliable. Wire the official SDK here when you supply
+/// production AdMob IDs and consent (UMP/ATT) flow.
 class AdService {
   AdService._();
   static final instance = AdService._();
@@ -9,22 +10,11 @@ class AdService {
   /// Feature flag — keep false until production IDs + consent flow are ready.
   static const adsEnabled = false;
 
-  bool _ready = false;
-
   Future<void> initialize() async {
-    if (!adsEnabled) return;
-    await MobileAds.instance.initialize();
-    _ready = true;
+    // No-op while ads are disabled / SDK not linked.
   }
 
-  bool get isReady => adsEnabled && _ready;
+  bool get isReady => false;
 
-  /// Google sample banner unit for debug builds only.
-  String get bannerAdUnitId {
-    if (kReleaseMode) {
-      // Replace when real AdMob IDs are supplied.
-      return 'ca-app-pub-xxxxxxxxxxxxxxxx/xxxxxxxxxx';
-    }
-    return 'ca-app-pub-3940256099942544/6300978111';
-  }
+  String get bannerAdUnitId => 'ca-app-pub-3940256099942544/6300978111';
 }

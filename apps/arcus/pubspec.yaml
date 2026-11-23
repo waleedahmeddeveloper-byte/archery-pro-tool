@@ -22,7 +22,6 @@ dependencies:
   collection: ^1.19.1
   meta: ^1.16.0
   # Ads behind abstraction — test IDs only until production IDs supplied.
-  google_mobile_ads: ^5.3.1
   cupertino_icons: ^1.0.8
   material_ui: ^1.11.1
 

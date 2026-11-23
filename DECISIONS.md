@@ -12,3 +12,5 @@
 | Drift/Isar | Deferred to next phase for profiles/history | — |
 
 Pinned via pubspec version constraints; run `flutter pub outdated` before releases.
+
+| google_mobile_ads deferred | Gradle incompatibility on current Flutter/AGP; AdService stub keeps ads-ready API | Link SDK when shipping ads |
