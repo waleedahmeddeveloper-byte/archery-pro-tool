@@ -14,64 +14,94 @@ class _SetupAssistantPageState extends State<SetupAssistantPage> {
   int _step = 0;
 
   BowType bowType = BowType.compound;
+  CamStyle camStyle = CamStyle.standard;
   final drawWeight = TextEditingController(text: '60');
   final drawLength = TextEditingController(text: '28');
   final ibo = TextEditingController(text: '335');
+  final letOff = TextEditingController(text: '80');
   final gpi = TextEditingController(text: '8.5');
   final shaftLen = TextEditingController(text: '28');
   final point = TextEditingController(text: '125');
   final insert = TextEditingController(text: '50');
+  final collar = TextEditingController(text: '0');
   final nock = TextEditingController(text: '8');
+  final wrap = TextEditingController(text: '5');
   final vane = TextEditingController(text: '6');
   String summary = '';
+  String? error;
 
   final engine = const ArcheryEngine();
 
   void _buildSummary() {
-    final components = ArrowComponents(
-      gpi: double.parse(gpi.text),
-      shaftLengthInches: double.parse(shaftLen.text),
-      pointGrains: double.parse(point.text),
-      insertGrains: double.parse(insert.text),
-      nockGrains: double.parse(nock.text),
-      vaneGrainsEach: double.parse(vane.text),
-      vaneCount: 3,
-    );
-    final weight = engine.arrowWeight(
-      components: components,
-      drawWeightPounds: double.parse(drawWeight.text),
-    );
-    final foc = engine.focFromComponents(components: components);
-    final speed = engine.speedFromIbo(
-      iboFps: double.parse(ibo.text),
-      drawWeightPounds: double.parse(drawWeight.text),
-      drawLengthInches: double.parse(drawLength.text),
-      arrowWeightGrains: weight.value.totalGrains,
-    );
-    final energy = engine.energyMomentum(
-      arrowWeightGrains: weight.value.totalGrains,
-      speedFps: speed.value.estimatedFps,
-    );
-    final spine = engine.spine(
-      bowType: bowType,
-      drawWeightPounds: double.parse(drawWeight.text),
-      arrowLengthInches: double.parse(shaftLen.text),
-      pointWeightGrains: double.parse(point.text),
-    );
+    try {
+      final components = ArrowComponents(
+        gpi: double.parse(gpi.text),
+        shaftLengthInches: double.parse(shaftLen.text),
+        pointGrains: double.parse(point.text),
+        insertGrains: double.parse(insert.text),
+        outsertOrCollarGrains: double.parse(collar.text),
+        nockGrains: double.parse(nock.text),
+        wrapGrains: double.parse(wrap.text),
+        vaneGrainsEach: double.parse(vane.text),
+        vaneCount: 3,
+      );
+      final weight = engine.arrowWeight(
+        components: components,
+        drawWeightPounds: double.parse(drawWeight.text),
+      );
+      final foc = engine.focFromComponents(components: components);
+      final speed = engine.speedFromIbo(
+        iboFps: double.parse(ibo.text),
+        drawWeightPounds: double.parse(drawWeight.text),
+        drawLengthInches: double.parse(drawLength.text),
+        arrowWeightGrains: weight.value.totalGrains,
+      );
+      final energy = engine.energyMomentum(
+        arrowWeightGrains: weight.value.totalGrains,
+        speedFps: speed.value.estimatedFps,
+      );
+      final spine = engine.spine(
+        bowType: bowType,
+        drawWeightPounds: double.parse(drawWeight.text),
+        arrowLengthInches: double.parse(shaftLen.text),
+        pointWeightGrains: double.parse(point.text),
+        camStyle: camStyle,
+      );
+      final holding = engine.letOffHolding(
+        peakDrawWeightPounds: double.parse(drawWeight.text),
+        letOffPercent: double.parse(letOff.text),
+      );
 
-    setState(() {
-      summary = '''
+      final warnings = [
+        ...weight.warnings,
+        ...speed.warnings,
+        ...spine.warnings,
+      ];
+      setState(() {
+        error = null;
+        summary = '''
 Total weight: ${weight.value.totalGrains.toStringAsFixed(1)} gr
+Shaft / front / rear: ${weight.value.shaftGrains.toStringAsFixed(1)} / ${weight.value.frontGrains.toStringAsFixed(1)} / ${weight.value.rearGrains.toStringAsFixed(1)} gr
 GPP: ${weight.value.grainsPerPound?.toStringAsFixed(2)}
 FOC (component estimate): ${foc.value.focPercent.toStringAsFixed(1)}%
+Holding weight @ ${letOff.text}% let-off: ${holding.value.holdingWeightPounds.toStringAsFixed(1)} lb
 Estimated speed: ${speed.value.estimatedFps.toStringAsFixed(1)} fps
-KE: ${energy.value.keFtLb.toStringAsFixed(1)} ft-lb
+KE: ${energy.value.keFtLb.toStringAsFixed(1)} ft-lb (${energy.value.keJoules.toStringAsFixed(1)} J)
 Momentum: ${energy.value.momentumSlugFtPerSec.toStringAsFixed(3)} slug·ft/s
-Planning spine: ${spine.value.primarySpine} (${spine.value.chartName})
+Planning spine: ${spine.value.primarySpine}${spine.value.alternateSpine == null ? '' : ' / ${spine.value.alternateSpine}'}
+Chart: ${spine.value.chartName}
 
-Assumptions: IBO→speed is an estimate; FOC here is component-based — measure balance point before hunting.
+Warnings: ${warnings.isEmpty ? 'none' : warnings.join(' · ')}
+
+Assumptions: IBO→speed is an estimate; FOC here is component-based — measure balance point before hunting. Chronograph before claiming performance.
 ''';
-    });
+      });
+    } catch (e) {
+      setState(() {
+        error = e.toString().replaceFirst('ValidationException: ', '');
+        summary = '';
+      });
+    }
   }
 
   @override
@@ -103,6 +133,17 @@ Assumptions: IBO→speed is an estimate; FOC here is component-based — measure
                       TextField(controller: drawWeight, decoration: const InputDecoration(labelText: 'Draw weight (lb)')),
                       TextField(controller: drawLength, decoration: const InputDecoration(labelText: 'Draw length (in)')),
                       TextField(controller: ibo, decoration: const InputDecoration(labelText: 'IBO rating (fps)')),
+                      TextField(controller: letOff, decoration: const InputDecoration(labelText: 'Let-off (%)')),
+                      DropdownButtonFormField<CamStyle>(
+                        initialValue: camStyle,
+                        items: const [
+                          DropdownMenuItem(value: CamStyle.standard, child: Text('Standard cam')),
+                          DropdownMenuItem(value: CamStyle.aggressive, child: Text('Aggressive cam')),
+                          DropdownMenuItem(value: CamStyle.soft, child: Text('Soft cam')),
+                        ],
+                        onChanged: (v) => setState(() => camStyle = v ?? CamStyle.standard),
+                        decoration: const InputDecoration(labelText: 'Cam system'),
+                      ),
                     ],
                   ),
                 ),
@@ -121,36 +162,46 @@ Assumptions: IBO→speed is an estimate; FOC here is component-based — measure
                   Column(
                     children: [
                       TextField(controller: insert, decoration: const InputDecoration(labelText: 'Insert (gr)')),
+                      TextField(controller: collar, decoration: const InputDecoration(labelText: 'Collar / outsert (gr)')),
                       TextField(controller: nock, decoration: const InputDecoration(labelText: 'Nock (gr)')),
+                      TextField(controller: wrap, decoration: const InputDecoration(labelText: 'Wrap (gr)')),
                       TextField(controller: vane, decoration: const InputDecoration(labelText: 'Vane each (gr) ×3')),
                     ],
                   ),
                 ),
                 _stepCard(
-                  '4. Review',
+                  '4. Performance',
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Tap Calculate performance to run the engine across weight, FOC estimate, speed, KE, momentum, and spine.'),
+                      const Text(
+                        'Runs weight, FOC estimate, IBO→speed, KE, momentum, let-off holding weight, and planning spine in one pass.',
+                      ),
                       const SizedBox(height: 12),
                       FilledButton(
                         onPressed: _buildSummary,
                         child: const Text('Calculate performance'),
                       ),
+                      if (error != null) ...[
+                        const SizedBox(height: 12),
+                        Text(error!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
+                      ],
                       const SizedBox(height: 12),
                       Text(summary),
                     ],
                   ),
                 ),
                 _stepCard(
-                  '5. Next actions',
+                  '5. Results & related tools',
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Deep-link into detailed calculators with this profile mindset:'),
-                      TextButton(onPressed: () => context.push('/calc/foc'), child: const Text('Measure FOC')),
-                      TextButton(onPressed: () => context.push('/calc/drop'), child: const Text('Plan sight marks')),
-                      TextButton(onPressed: () => context.push('/calc/spine'), child: const Text('Recheck spine')),
+                      const Text('Open detailed calculators (same formulas, more charts and FAQs):'),
+                      TextButton(onPressed: () => context.push('/calc/foc'), child: const Text('Measure FOC (AMO)')),
+                      TextButton(onPressed: () => context.push('/calc/ke-momentum'), child: const Text('KE & momentum')),
+                      TextButton(onPressed: () => context.push('/calc/drop'), child: const Text('Arrow drop / trajectory')),
+                      TextButton(onPressed: () => context.push('/calc/spine'), child: const Text('Spine selection')),
+                      TextButton(onPressed: () => context.push('/calc/sight-pin'), child: const Text('Sight pin gaps')),
                       const SizedBox(height: 8),
                       const Text(
                         'Estimates only. Chronograph speed and bare-shaft tune before hunting or competition.',

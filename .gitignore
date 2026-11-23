@@ -20,3 +20,8 @@ node_modules/
 android/key.properties
 **/google-services.json
 **/GoogleService-Info.plist
+# Built binaries (copy from flutter build outputs when needed)
+dist/
+*.apk
+*.aab
+*.ipa

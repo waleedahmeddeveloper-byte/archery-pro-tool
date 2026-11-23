@@ -181,4 +181,52 @@ void main() {
       expect(r.value, closeTo(34.64, 0.05));
     });
   });
+
+  group('Crossbow & bow energy', () {
+    test('crossbow speed scales with sqrt mass', () {
+      final r = engine.crossbowSpeed(
+        ratedSpeedFps: 400,
+        ratedBoltGrains: 400,
+        yourBoltGrains: 450,
+      );
+      expect(r.value.estimatedFps, lessThan(400));
+      expect(r.value.estimatedFps, greaterThan(370));
+    });
+
+    test('bow energy efficiency positive', () {
+      final r = engine.bowEnergy(
+        peakDrawWeightPounds: 70,
+        drawLengthInches: 29,
+        arrowWeightGrains: 420,
+        arrowSpeedFps: 280,
+      );
+      expect(r.value.efficiencyPercent, greaterThan(50));
+      expect(r.value.efficiencyPercent, lessThan(120));
+    });
+  });
+
+  group('Sight pin & point FOC', () {
+    test('pin gaps increase at longer distances', () {
+      final r = engine.sightPinGaps(
+        speedFps: 280,
+        zeroYards: 20,
+        peepToSightInches: 28,
+      );
+      expect(r.value.gapsInches.length, greaterThan(2));
+      expect(
+        r.value.gapsInches.last.gapInches,
+        greaterThan(r.value.gapsInches.first.gapInches),
+      );
+    });
+
+    test('point weight for higher FOC is positive', () {
+      final r = engine.pointWeightForFoc(
+        arrowLengthInches: 29,
+        currentTotalGrains: 420,
+        currentFocPercent: 10,
+        targetFocPercent: 14,
+      );
+      expect(r.value, greaterThan(0));
+    });
+  });
 }

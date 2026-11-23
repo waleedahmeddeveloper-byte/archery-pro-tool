@@ -14,6 +14,10 @@ class CalculatorScaffold extends StatelessWidget {
     required this.onReset,
     this.resultPanel,
     this.related = const [],
+    this.onRelatedTap,
+    this.breadcrumb = const [],
+    this.faqs = const [],
+    this.examples = const [],
   });
 
   final String title;
@@ -23,6 +27,10 @@ class CalculatorScaffold extends StatelessWidget {
   final VoidCallback onReset;
   final Widget? resultPanel;
   final List<String> related;
+  final ValueChanged<String>? onRelatedTap;
+  final List<String> breadcrumb;
+  final List<({String q, String a})> faqs;
+  final List<String> examples;
 
   @override
   Widget build(BuildContext context) {
@@ -33,6 +41,15 @@ class CalculatorScaffold extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 100),
         children: [
+          if (breadcrumb.isNotEmpty) ...[
+            Text(
+              breadcrumb.join(' › '),
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+            ),
+            const SizedBox(height: 8),
+          ],
           Text(intro, style: Theme.of(context).textTheme.bodyMedium),
           const SizedBox(height: 8),
           Text(
@@ -45,6 +62,32 @@ class CalculatorScaffold extends StatelessWidget {
             const SizedBox(height: 20),
             resultPanel!,
           ],
+          if (examples.isNotEmpty) ...[
+            const SizedBox(height: 24),
+            Text('Worked examples', style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 8),
+            ...examples.map((e) => Text('• $e')),
+          ],
+          if (faqs.isNotEmpty) ...[
+            const SizedBox(height: 24),
+            Text('FAQ', style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 8),
+            ...faqs.map(
+              (f) => ExpansionTile(
+                tilePadding: EdgeInsets.zero,
+                title: Text(f.q),
+                children: [
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: Text(f.a),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
           if (related.isNotEmpty) ...[
             const SizedBox(height: 24),
             Text(AppStrings.related, style: Theme.of(context).textTheme.titleMedium),
@@ -52,7 +95,14 @@ class CalculatorScaffold extends StatelessWidget {
             Wrap(
               spacing: 8,
               runSpacing: 8,
-              children: related.map((e) => Chip(label: Text(e))).toList(),
+              children: related
+                  .map(
+                    (e) => ActionChip(
+                      label: Text(e),
+                      onPressed: onRelatedTap == null ? null : () => onRelatedTap!(e),
+                    ),
+                  )
+                  .toList(),
             ),
           ],
         ],

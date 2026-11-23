@@ -1,10 +1,16 @@
 import 'formulas/arrow_weight.dart';
 import 'formulas/ballistics.dart';
+import 'formulas/bow_energy.dart';
 import 'formulas/converters.dart';
+import 'formulas/crossbow.dart';
+import 'formulas/downrange.dart';
 import 'formulas/draw.dart';
+import 'formulas/draw_weight.dart';
 import 'formulas/energy.dart';
 import 'formulas/foc.dart';
 import 'formulas/let_off.dart';
+import 'formulas/point_foc.dart';
+import 'formulas/sight_pin.dart';
 import 'formulas/speed.dart';
 import 'formulas/spine.dart';
 import 'models/components.dart';
@@ -78,6 +84,17 @@ class ArcheryEngine {
   CalcResult<double> drawLengthFromWingspan(double wingspanInches) =>
       estimateDrawLengthFromWingspan(wingspanInches: wingspanInches);
 
+  CalcResult<double> arrowCutLength({
+    required double drawLengthInches,
+    double restFrontOfRestInches = 1.0,
+    bool broadheadClearance = true,
+  }) =>
+      suggestArrowCutLength(
+        drawLengthInches: drawLengthInches,
+        restFrontOfRestInches: restFrontOfRestInches,
+        broadheadClearance: broadheadClearance,
+      );
+
   CalcResult<SpineSelectionResult> spine({
     required BowType bowType,
     required double drawWeightPounds,
@@ -136,6 +153,108 @@ class ArcheryEngine {
         peakDrawWeightPounds: peakDrawWeightPounds,
         letOffPercent: letOffPercent,
       );
+
+  CalcResult<LetOffResult> letOffFromHolding({
+    required double peakDrawWeightPounds,
+    required double holdingWeightPounds,
+  }) =>
+      letOffFromHoldingWeight(
+        peakDrawWeightPounds: peakDrawWeightPounds,
+        holdingWeightPounds: holdingWeightPounds,
+      );
+
+  CalcResult<BowEnergyResult> bowEnergy({
+    required double peakDrawWeightPounds,
+    required double drawLengthInches,
+    required double arrowWeightGrains,
+    required double arrowSpeedFps,
+    double braceHeightInches = 6.5,
+    double letOffPercent = 80,
+  }) =>
+      calculateBowEnergy(
+        peakDrawWeightPounds: peakDrawWeightPounds,
+        drawLengthInches: drawLengthInches,
+        arrowWeightGrains: arrowWeightGrains,
+        arrowSpeedFps: arrowSpeedFps,
+        braceHeightInches: braceHeightInches,
+        letOffPercent: letOffPercent,
+      );
+
+  CalcResult<DownrangeResult> downrange({
+    required double launchSpeedFps,
+    required double arrowWeightGrains,
+    double dragPerSecond = 0.08,
+    List<double> distancesYards = const [0, 20, 30, 40, 50, 60],
+  }) =>
+      calculateDownrange(
+        launchSpeedFps: launchSpeedFps,
+        arrowWeightGrains: arrowWeightGrains,
+        dragPerSecond: dragPerSecond,
+        distancesYards: distancesYards,
+      );
+
+  CalcResult<double> velocityLossAt({
+    required double launchSpeedFps,
+    required double distanceYards,
+    double dragPerSecond = 0.08,
+  }) =>
+      velocityLoss(
+        launchSpeedFps: launchSpeedFps,
+        distanceYards: distanceYards,
+        dragPerSecond: dragPerSecond,
+      );
+
+  CalcResult<SightPinGapResult> sightPinGaps({
+    required double speedFps,
+    required double zeroYards,
+    required double peepToSightInches,
+    List<double> distancesYards = const [20, 30, 40, 50, 60],
+  }) =>
+      calculateSightPinGaps(
+        speedFps: speedFps,
+        zeroYards: zeroYards,
+        peepToSightInches: peepToSightInches,
+        distancesYards: distancesYards,
+      );
+
+  CalcResult<CrossbowSpeedResult> crossbowSpeed({
+    required double ratedSpeedFps,
+    required double ratedBoltGrains,
+    required double yourBoltGrains,
+  }) =>
+      estimateCrossbowSpeed(
+        ratedSpeedFps: ratedSpeedFps,
+        ratedBoltGrains: ratedBoltGrains,
+        yourBoltGrains: yourBoltGrains,
+      );
+
+  CalcResult<String> crossbowBoltGuide({
+    required double ratedSpeedFps,
+    required double drawWeightPounds,
+  }) =>
+      crossbowBoltSelectionGuide(
+        ratedSpeedFps: ratedSpeedFps,
+        drawWeightPounds: drawWeightPounds,
+      );
+
+  CalcResult<double> pointWeightForFoc({
+    required double arrowLengthInches,
+    required double currentTotalGrains,
+    required double currentFocPercent,
+    required double targetFocPercent,
+  }) =>
+      pointWeightForTargetFoc(
+        arrowLengthInches: arrowLengthInches,
+        currentTotalGrains: currentTotalGrains,
+        currentFocPercent: currentFocPercent,
+        targetFocPercent: targetFocPercent,
+      );
+
+  CalcResult<DrawWeightGuideResult> drawWeightGuide({
+    required GameClass game,
+    required double drawLengthInches,
+  }) =>
+      suggestDrawWeight(game: game, drawLengthInches: drawLengthInches);
 
   double convertWeightValue(double value, WeightUnit from, WeightUnit to) =>
       convertWeight(value, from, to);

@@ -19,7 +19,11 @@ Offline-first professional archery calculators for **Android** and **iOS** (Flut
 
 ## Brand
 
-**Arcus** — spruce + brass design system (original; not copied from any reference site).
+**Arcus** — spruce + brass (light) and dark navy themes (original; not copied from any reference site).
+
+## Calculators
+
+50+ tools across arrow build, bow performance, hunting energy/ballistics, spine & tuning, crossbow, converters, plus the guided **Setup Assistant**. Every result shows formula, steps, assumptions, limitations, safety notes, and citations from `archery_engine`.
 
 ## Quick start
 

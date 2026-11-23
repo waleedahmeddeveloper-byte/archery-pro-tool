@@ -97,4 +97,31 @@ abstract final class Citations {
     notes:
         'Many compounds specify ≥5 grains per pound of draw weight. Never shoot below the bow manufacturer minimum.',
   );
+
+  static const arrowWeightSum = FormulaCitation(
+    id: 'arrow_weight_sum',
+    title: 'Finished arrow weight from GPI and components',
+    source: 'Arrow building practice',
+    url: 'https://eastonarchery.com/',
+    notes:
+        'Total grains ≈ (GPI × cut length) + tip/insert/collar + nock/bushing/wrap/vanes. Prefer a grain scale for finished arrows.',
+  );
+
+  static const unitConversions = FormulaCitation(
+    id: 'unit_conversions',
+    title: 'Dimensionally correct unit conversions',
+    source: 'NIST / SI conversion factors',
+    url: 'https://www.nist.gov/',
+    notes:
+        'Grains↔grams, inches↔mm, fps↔m/s, ft-lb↔J use fixed published factors; no archery-specific fudge.',
+  );
+
+  static const spinePlanning = FormulaCitation(
+    id: 'spine_planning',
+    title: 'Static spine definition and planning charts',
+    source: 'AMO static spine test + Arcus planning bands',
+    url: 'https://eastonarchery.com/',
+    notes:
+        'Static spine ≈ deflection (in) × 1000 under AMO test. Dynamic selection uses effective-weight heuristics and manufacturer charts.',
+  );
 }

@@ -3,16 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../features/assistant/setup_assistant_page.dart';
-import '../../features/calculators/arrow_weight_page.dart';
-import '../../features/calculators/converter_page.dart';
-import '../../features/calculators/draw_length_page.dart';
-import '../../features/calculators/drop_page.dart';
-import '../../features/calculators/foc_page.dart';
-import '../../features/calculators/ibo_speed_page.dart';
-import '../../features/calculators/ke_momentum_page.dart';
-import '../../features/calculators/shot_angle_page.dart';
-import '../../features/calculators/speed_mass_page.dart';
-import '../../features/calculators/spine_page.dart';
+import '../../features/calculators/generic_calculator_page.dart';
 import '../../features/home/calculators_tab.dart';
 import '../../features/home/home_tab.dart';
 import '../../features/home/library_tab.dart';
@@ -85,36 +76,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           ),
         ],
       ),
-      GoRoute(path: '/calc/foc', builder: (_, __) => const FocPage()),
       GoRoute(
-        path: '/calc/arrow-weight',
-        builder: (_, __) => const ArrowWeightPage(),
-      ),
-      GoRoute(
-        path: '/calc/ke-momentum',
-        builder: (_, __) => const KeMomentumPage(),
-      ),
-      GoRoute(
-        path: '/calc/speed-mass',
-        builder: (_, __) => const SpeedMassPage(),
-      ),
-      GoRoute(
-        path: '/calc/ibo-speed',
-        builder: (_, __) => const IboSpeedPage(),
-      ),
-      GoRoute(path: '/calc/spine', builder: (_, __) => const SpinePage()),
-      GoRoute(path: '/calc/drop', builder: (_, __) => const DropPage()),
-      GoRoute(
-        path: '/calc/draw-length',
-        builder: (_, __) => const DrawLengthPage(),
-      ),
-      GoRoute(
-        path: '/calc/shot-angle',
-        builder: (_, __) => const ShotAnglePage(),
-      ),
-      GoRoute(
-        path: '/calc/converter',
-        builder: (_, __) => const ConverterPage(),
+        path: '/calc/:id',
+        builder: (context, state) => GenericCalculatorPage(
+          calcId: state.pathParameters['id']!,
+        ),
       ),
       GoRoute(path: '/privacy', builder: (_, __) => const PrivacyPage()),
       GoRoute(path: '/terms', builder: (_, __) => const TermsPage()),
