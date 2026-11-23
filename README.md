@@ -52,7 +52,9 @@ flutter build appbundle --release
 # APK: flutter build apk --release
 ```
 
-Release signing: copy `android/key.properties.example` → `android/key.properties` (gitignored). Steps: [docs/android/RELEASE_SIGNING.md](./docs/android/RELEASE_SIGNING.md).
+Release signing: copy `android/key.properties.example` → `android/key.properties` (gitignored). Steps: [docs/android/RELEASE_SIGNING.md](./docs/android/RELEASE_SIGNING.md).  
+Missing `key.properties` **fails** release builds (CI may use `-PallowDebugReleaseSigning=true`).  
+Store checklist (app ID, icons, Data Safety, etc.): [docs/android/RELEASE_READINESS_CHECKLIST.md](./docs/android/RELEASE_READINESS_CHECKLIST.md).
 
 ### iOS release
 

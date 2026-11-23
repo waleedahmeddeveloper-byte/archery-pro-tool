@@ -1,9 +1,9 @@
 # Full code review — Arcus (updated)
 
-**Date:** 2026-11-23 (follow-up)  
+**Date:** 2026-11-23 (release-readiness follow-up)  
 **Repo:** `waleedahmeddeveloper-byte/archery-pro-tool`  
-**Scope:** Entire monorepo after integration/widget tests, coverage gate, signing docs, sync API client, iOS checklist.  
-**Method:** Static review + `dart analyze` / `flutter analyze` + unit/widget + Linux integration tests + lcov. No guess for unverified items.
+**Scope:** Integration on Android emulator, signing gate, app coverage ≥70%, lazy catalog + a11y, release checklist, release AAB.  
+**Method:** Emulator IT + `flutter analyze` / unit+widget tests + lcov + `flutter build appbundle --release`. No guess for unverified items.
 
 ---
 
@@ -11,22 +11,43 @@
 
 | Package | Lines hit | Total | % | Target |
 | --- | --- | --- | --- | --- |
-| `packages/archery_engine` | 645 | 662 | **97.4%** | ≥95% — **met** (CI gate in `.github/workflows/ci.yml`) |
-| `apps/arcus` | 631 | 1435 | **44.0%** | No hard gate (UI surface is large); widget + integration cover main flows |
+| `packages/archery_engine` | 645 | 662 | **97.4%** | ≥95% — **met** |
+| `apps/arcus` | 1225 | 1488 | **82.3%** | ≥70% — **met** |
 
 ---
 
-## Test results (this pass)
+## Android emulator integration tests
 
-| Suite | Result |
+Device: `emulator-5554` (AVD `arcus_api34`, API 34). Command: `flutter test integration_test/app_flows_test.dart -d emulator-5554`.
+
+| # | Test | Result |
+| --- | --- | --- |
+| 1 | onboarding then offline home launch | **PASS** |
+| 2 | skip onboarding reaches home offline | **PASS** |
+| 3 | Setup Assistant 5 steps + save/load profile | **PASS** |
+| 4 | search and one calculator per category | **PASS** |
+
+**Totals: 4 passed / 0 failed.**
+
+---
+
+## Release AAB
+
+| Item | Value |
 | --- | --- |
-| `packages/archery_engine` `dart analyze` | Pass (0 issues) |
-| `packages/archery_engine` `dart test` | **53 passed** |
-| `apps/arcus` `flutter analyze` | Pass (0 issues) |
-| `apps/arcus` `flutter test` | **10 passed** (onboarding smoke, scaffold Calculate/Reset/Copy, FOC/GPP/unknown calc, profile + sync client) |
-| `apps/arcus` `integration_test/app_flows_test.dart` (-d linux) | **4 passed**: onboarding, skip→offline home, Setup Assistant 5 steps + save profile, search empty + one calc per category |
-| iOS build / Xcode | **Not run** (no macOS) — see `docs/ios/IOS_RELEASE_CHECKLIST.md` |
-| Android release keystore | Configured via `key.properties` when present; secrets **not** committed |
+| Artifact | `apps/arcus/build/app/outputs/bundle/release/app-release.aab` |
+| Size | **53,303,853 bytes (~50.8 MiB / Flutter reports 53.3MB)** |
+| Signing | Ephemeral upload keystore via local `key.properties` (not committed) |
+| Without `key.properties` | **Fails** with clear Gradle error (verified) |
+| CI debug-signed escape | `CI=true` or `-PallowDebugReleaseSigning=true` |
+
+### Build warnings (observed)
+
+- Icon font tree-shaking: CupertinoIcons 99.7%, MaterialIcons 99.8% (informational)
+- `Caught exception: Already watching path: .../android` (Gradle file watcher noise; build succeeded)
+- JKS keystore format advisory from `keytool` when generating a local upload key (prefer PKCS12 for production)
+
+No Dart analyzer issues. No shipping blockers in the warning set above.
 
 ---
 
@@ -34,59 +55,56 @@
 
 ### Critical
 
-| ID | Issue | File:line | Cause | Fix | Status |
-| --- | --- | --- | --- | --- | --- |
-| — | None verified | — | — | — | — |
+| ID | Issue | Status |
+| --- | --- | --- |
+| — | None verified | — |
 
 ### High
 
-| ID | Issue | File:line | Cause | Fix | Status |
-| --- | --- | --- | --- | --- | --- |
-| H1 | GPP could show NaN/Infinity | `generic_calculator_page.dart` | Inline division | Route through engine `grainsPerPound` | **Fixed** (prior) |
-| H2 | Point FOC accepted NaN percents | `point_foc.dart` | Missing finite checks | `requireFiniteNumber` | **Fixed** (prior) |
-| H3 | Release APK unsigned / debug-signed without owner keystore | `android/app/build.gradle.kts` | No secrets in repo | Reads `android/key.properties`; docs in `docs/android/RELEASE_SIGNING.md`; debug fallback for CI only | **Mitigated** — owner must supply keystore before Play upload |
-| H4 | Content API host is placeholder | `content_api_client.dart` `kArcusApiBase` | Website API not live | OpenAPI at `docs/api/openapi.yaml`; client has retry/backoff + disk cache offline fallback; override via `--dart-define=ARCUS_API_BASE=` | **Open** (blocked on website deploy) |
+| ID | Issue | Status |
+| --- | --- | --- |
+| H1–H2 | NaN / validation gaps (GPP, point FOC) | **Fixed** (prior) |
+| H3 | Release could ship debug-signed | **Fixed** — missing `key.properties` fails release; debug fallback only for CI / `-PallowDebugReleaseSigning=true` |
+| H4 | Content API host placeholder | **Open** — client + OpenAPI ready; set `ARCUS_API_BASE` when website is live |
+| H5 | Placeholder application id `com.arcus.arcus` | **Open** — owner must set Play ID before store upload (checklist) |
 
 ### Medium
 
-| ID | Issue | File:line | Cause | Fix | Status |
-| --- | --- | --- | --- | --- | --- |
-| M1 | Setup Assistant Done no-op | `setup_assistant_page.dart` | Step guard | `context.go('/')` | **Fixed** |
-| M2 | Marketing ahead of profile feature | onboarding/home/privacy | Copy drift | Aligned + `RigProfileStore` | **Fixed** |
-| M3 | Prefs hit every GoRouter redirect | `onboarding_gate.dart` | Async prefs | Cache | **Fixed** |
-| M4 | Sync was mock-only | `sync_status_provider.dart` | Stub delay | Real `ContentApiClient` + OpenAPI | **Fixed** |
-| M5 | Calculators search empty state | `calculators_tab.dart` | Missing UI | Empty message | **Fixed** |
-| M6 | App line coverage ~44% | `apps/arcus/lib` | Large UI / routes | Integration + widget cover critical paths; raise later with more widget tests | Open |
-| M7 | Duplicate catalog IDs share runners | `calculator_catalog.dart` | Overlapping product entries | Documented; behavior OK | Open (product) |
-| M8 | Main manifest now has INTERNET | `AndroidManifest.xml` | Needed for content sync | Keep; sync fails soft to offline cache | Accepted |
+| ID | Issue | Status |
+| --- | --- | --- |
+| M1–M5 | Assistant Done, profiles, prefs cache, sync mock, search empty | **Fixed** |
+| M6 | App coverage was ~44% | **Fixed** — **82.3%** |
+| M7 | Catalog ListView eager children | **Fixed** — `ListView.builder` lazy rows |
+| M8 | Accessibility (labels / contrast / 200% text) | **Mitigated** — semantics on search/list/nav/FOC/CTAs; contrast tokens; text-scale widget test |
+| M9 | `integration_test` could break release Java compile | **Mitigated** — Gradle strips registrant registration for release |
+| M10 | Default Flutter launcher icons / splash | **Open** — checklist item for brand assets |
 
 ### Low
 
-| ID | Issue | File:line | Cause | Fix | Status |
-| --- | --- | --- | --- | --- | --- |
-| L1 | Application ID `com.arcus.arcus` | `build.gradle.kts` | Scaffold default | Owner sets Play/App Store ID | Open |
-| L2 | Catalog ListView eager children | `calculators_tab.dart` | ~50 items | `ListView.builder` if catalog grows | Open |
-| L3 | `material_ui` wrapper | throughout | Extra dep | Keep unless migrating | Open |
-| L4 | Limited Semantics on charts | FOC visual / lists | No explicit labels | Future a11y pass | Open |
-| L5 | Integration search needs TextField focus after nav tap | `app_flows_test.dart` | NavBar tap steals focus; `enterText` no-op | Tests tap field before `enterText` | **Fixed** (test harness) |
-| L6 | iOS PrivacyInfo.xcprivacy not authored here | `ios/Runner` | No macOS/Xcode | Checklist in `docs/ios/IOS_RELEASE_CHECKLIST.md` | Open (Mac required) |
+| ID | Issue | Status |
+| --- | --- | --- |
+| L1 | Duplicate catalog IDs sharing runners | Open (product) |
+| L2 | iOS PrivacyInfo / signing | Open — Mac checklist only |
+| L3 | Play Data Safety / hosted privacy URL | Open — answers drafted in checklist |
+| L4 | AAB ~53MB | Informational — includes engine + Material; minify/split later if needed |
 
 ---
 
-## 2. Deliverables from this follow-up
+## 2. Deliverables this follow-up
 
-1. **Integration tests** — onboarding, offline home, Setup Assistant (5 steps) + save profile, search + one calculator per category  
-2. **Widget tests** — `CalculatorScaffold` Calculate/Reset; `ResultBreakdown` Copy; `GenericCalculatorPage` validation / Calculate / Reset / Copy / errors  
-3. **Coverage** — engine **97.4%** (CI ≥95%); app **44.0%** reported  
-4. **Release signing** — Gradle reads `key.properties` (gitignored); `key.properties.example` + `docs/android/RELEASE_SIGNING.md`  
-5. **Sync** — `ContentApiClient` (HTTPS, retry/backoff, disk cache, offline fallback) + `docs/api/openapi.yaml`  
-6. **iOS** — `docs/ios/IOS_RELEASE_CHECKLIST.md` (signing, Info.plist, ATT, privacy manifest)
+1. Android emulator IT — **4/4 pass** (table above)  
+2. Release signing gate + CI/debug escape hatch + docs  
+3. App coverage **82.3%** (profile, sync/offline, settings, search, catalog calculators, Assistant)  
+4. Lazy calculator catalog + a11y labels/contrast/200% scale test  
+5. `docs/android/RELEASE_READINESS_CHECKLIST.md` (app ID, versions, icons, splash, permissions, privacy, Data Safety)  
+6. Release AAB built and sized  
+7. This report  
 
 ---
 
 ## 3. Remaining risks
 
-- Store release stays **debug-signed** until the owner adds a real keystore via `key.properties`.  
-- Live content sync needs a website implementing `docs/api/openapi.yaml` and `ARCUS_API_BASE`.  
-- iOS IPA / ATT / Privacy Manifest **must** be completed on a Mac.  
-- App coverage is modest outside the exercised flows; expand widget tests for More/Library/theme if raising the bar.
+- Owner must replace `com.arcus.arcus`, icons/splash, and supply production keystore before Play.  
+- Live sync needs website implementing OpenAPI.  
+- iOS IPA still requires macOS.  
+- Ephemeral CI keystore used only to measure AAB size here — **not** for store upload.

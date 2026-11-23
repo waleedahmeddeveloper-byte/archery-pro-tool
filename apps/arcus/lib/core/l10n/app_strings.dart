@@ -30,7 +30,7 @@ abstract final class AppStrings {
       'Enter bow and arrow data once in the Assistant, then open detailed calculators for charts and FAQs.';
   static const onboardingTitle3 = 'Offline first';
   static const onboardingBody3 =
-      'Charts, guides, and math stay on-device. Optional content sync is mocked until a live API is connected.';
+      'Charts, guides, and math stay on-device. Optional content sync uses HTTPS with offline cache when a host is configured.';
   static const getStarted = 'Get started';
   static const skip = 'Skip';
 }

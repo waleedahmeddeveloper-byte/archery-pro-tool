@@ -33,10 +33,26 @@ flutter build appbundle --release
 # or: flutter build apk --release
 ```
 
-If `key.properties` is missing, Gradle falls back to the **debug** keystore so CI/`flutter build apk --release` still works locally. Do **not** ship a debug-signed APK to Play Store.
+## Missing key.properties
+
+**Release builds fail** with a clear Gradle error if `android/key.properties` is missing.
+
+Debug-signed release is allowed **only** when:
+
+- `CI=true` (GitHub Actions sets this), or
+- you pass `-PallowDebugReleaseSigning=true`
+
+```bash
+# CI / local throwaway artifact only — do NOT upload to Play
+flutter build appbundle --release --android-project-arg=allowDebugReleaseSigning=true
+```
+
+Do **not** ship a debug-signed AAB/APK to Play Store.
 
 ## Verify
 
 ```bash
+jarsigner -verify -verbose -certs build/app/outputs/bundle/release/app-release.aab
+# or for APK:
 jarsigner -verify -verbose -certs build/app/outputs/flutter-apk/app-release.apk
 ```

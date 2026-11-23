@@ -42,5 +42,16 @@ jobs:
         run: |
           flutter pub get
           flutter analyze
-          flutter test
+          flutter test --coverage
+          python3 - <<'PY'
+          from pathlib import Path
+          lf=lh=0
+          for line in Path('coverage/lcov.info').read_text().splitlines():
+            if line.startswith('LF:'): lf+=int(line[3:])
+            elif line.startswith('LH:'): lh+=int(line[3:])
+          pct=100*lh/max(lf,1)
+          print(f'app coverage {pct:.1f}% ({lh}/{lf})')
+          if pct < 70:
+            raise SystemExit(f'App coverage {pct:.1f}% < 70%')
+          PY
           flutter test integration_test/app_flows_test.dart -d flutter-tester || flutter test integration_test/app_flows_test.dart -d linux

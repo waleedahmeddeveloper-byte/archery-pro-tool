@@ -17,33 +17,43 @@ class FocVisual extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Balance diagram',
-          style: Theme.of(context).textTheme.titleSmall,
-        ),
-        const SizedBox(height: 8),
-        SizedBox(
-          height: 120,
-          width: double.infinity,
-          child: CustomPaint(
-            painter: _FocPainter(
-              lengthInches: lengthInches,
-              balanceInches: balanceInches,
-              color: Theme.of(context).colorScheme.primary,
-              accent: Theme.of(context).colorScheme.tertiary,
-              labelColor: Theme.of(context).colorScheme.onSurface,
+    final summary =
+        'FOC ${focPercent.toStringAsFixed(2)}% · midshaft at ${(lengthInches / 2).toStringAsFixed(2)} in · balance at ${balanceInches.toStringAsFixed(2)} in';
+    return Semantics(
+      label:
+          'Arrow front-of-center balance diagram. $summary',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Balance diagram',
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
+          const SizedBox(height: 8),
+          SizedBox(
+            height: 120,
+            width: double.infinity,
+            child: ExcludeSemantics(
+              child: CustomPaint(
+                painter: _FocPainter(
+                  lengthInches: lengthInches,
+                  balanceInches: balanceInches,
+                  color: Theme.of(context).colorScheme.primary,
+                  accent: Theme.of(context).colorScheme.tertiary,
+                  labelColor: Theme.of(context).colorScheme.onSurface,
+                ),
+              ),
             ),
           ),
-        ),
-        const SizedBox(height: 6),
-        Text(
-          'FOC ${focPercent.toStringAsFixed(2)}% · midshaft at ${(lengthInches / 2).toStringAsFixed(2)} in · balance at ${balanceInches.toStringAsFixed(2)} in',
-          style: Theme.of(context).textTheme.bodySmall,
-        ),
-      ],
+          const SizedBox(height: 6),
+          Text(
+            summary,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
+          ),
+        ],
+      ),
     );
   }
 }

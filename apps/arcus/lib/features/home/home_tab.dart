@@ -49,19 +49,23 @@ class HomeTab extends StatelessWidget {
                       Text(
                         'Setup Assistant',
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              color: Colors.white,
+                              color: ArcusColors.onSpruce,
                               fontWeight: FontWeight.w700,
                             ),
                       ),
                       const SizedBox(height: 6),
                       const Text(
                         'Enter bow and arrow data once for a full performance summary, then open related calculators.',
-                        style: TextStyle(color: Colors.white70),
+                        style: TextStyle(color: ArcusColors.onSpruceMuted),
                       ),
                       const SizedBox(height: 12),
-                      FilledButton.tonal(
-                        onPressed: () => context.go('/assistant'),
-                        child: const Text('Start guided setup'),
+                      Semantics(
+                        button: true,
+                        label: 'Start guided setup assistant',
+                        child: FilledButton.tonal(
+                          onPressed: () => context.go('/assistant'),
+                          child: const Text('Start guided setup'),
+                        ),
                       ),
                     ],
                   ),
@@ -82,12 +86,19 @@ class HomeTab extends StatelessWidget {
             separatorBuilder: (_, __) => const SizedBox(height: 10),
             itemBuilder: (context, index) {
               final item = featured[index];
-              return Card(
-                child: ListTile(
-                  title: Text(item.title),
-                  subtitle: Text(item.subtitle),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () => context.push(item.route),
+              return Semantics(
+                button: true,
+                label: 'Featured calculator ${item.title}. ${item.subtitle}',
+                child: Card(
+                  child: ListTile(
+                    title: Text(item.title),
+                    subtitle: Text(item.subtitle),
+                    trailing: const Icon(
+                      Icons.chevron_right,
+                      semanticLabel: 'Open calculator',
+                    ),
+                    onTap: () => context.push(item.route),
+                  ),
                 ),
               );
             },

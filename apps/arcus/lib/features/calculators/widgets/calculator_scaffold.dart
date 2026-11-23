@@ -113,17 +113,25 @@ class CalculatorScaffold extends StatelessWidget {
           child: Row(
             children: [
               Expanded(
-                child: OutlinedButton(
-                  onPressed: onReset,
-                  child: const Text(AppStrings.reset),
+                child: Semantics(
+                  button: true,
+                  label: AppStrings.reset,
+                  child: OutlinedButton(
+                    onPressed: onReset,
+                    child: const Text(AppStrings.reset),
+                  ),
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
                 flex: 2,
-                child: FilledButton(
-                  onPressed: onCalculate,
-                  child: const Text(AppStrings.calculate),
+                child: Semantics(
+                  button: true,
+                  label: AppStrings.calculate,
+                  child: FilledButton(
+                    onPressed: onCalculate,
+                    child: const Text(AppStrings.calculate),
+                  ),
                 ),
               ),
             ],
@@ -181,7 +189,10 @@ class ResultBreakdown extends StatelessWidget {
                   tooltip: AppStrings.copyResult,
                   onPressed: () => _copy(context),
                   icon: const Icon(Icons.copy),
-                ),
+                  style: IconButton.styleFrom(
+                    foregroundColor: Theme.of(context).colorScheme.onSurface,
+                  ),
+                )
               ],
             ),
             if (result.warnings.isNotEmpty) ...[
