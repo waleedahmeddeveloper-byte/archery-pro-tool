@@ -198,8 +198,8 @@ export const CONNECTORS: Connector[] = [
   {
     id: "crustdata",
     name: "Crustdata",
-    status: "pending",
-    detail: "Approve the auth prompt to finish",
+    status: "ready",
+    detail: "Company and people enrichment",
     category: "data",
   },
   {
