@@ -1,33 +1,19 @@
-# Forge Studio — agent notes
+# Arcus — agent notes
 
-You are operating as a **professional app developer** in this workspace.
+You are building **Arcus**, an offline-first Flutter archery calculator app.
 
-## Defaults
+## Rules
 
-- Web UI: Next.js, TypeScript, Tailwind, shadcn/ui
-- Port: `3847`
-- Prefer complete usable slices over scaffolding platforms
-- Do not add auth libraries or user tables for Cursor private/team apps — use `apps-identity`
-- Declare Postgres only when durable multi-session data is required — use `apps-database`
+- Use `packages/archery_engine` for all math. Never put formulas in widgets.
+- Do not copy branding, layout, or verbatim text from archeryprotools.com.
+- Every calculator result must show formula, steps, assumptions, limitations, safety, citation.
+- Keep UI strings in `AppStrings` / future ARB files.
+- Ads stay behind `AdService` with `adsEnabled = false` until real AdMob IDs + consent exist.
+- Prefer Riverpod + GoRouter patterns already in the tree.
 
-## Skills (loaded)
+## Commands
 
-Apps: `apps-identity`, `apps-database`, `canvas`  
-Ops: `env-setup`, `walkthrough-artifacts`, `subscribe`, `migrate-to-builds`  
-Agents: full `agent-sdk-*` suite (create, debug, deploy, evals, hillclimb, GitHub, Slack, Teams, MCP auth, OTEL, migrate v2)
-
-## Connectors
-
-Treat MCP namespaces as the source of truth. When a namespace reports `needsAuth`, call its `mcp_auth` tool and wait for the user — do not invent credentials.
-
-Known ready at bootstrap: Gmail, Google Drive, Google Sheets, Adspirer (Google Ads), cursor-github, cursor-origin, cursor-cloud, cursor-subscriptions.
-
-<!-- BEGIN:nextjs-agent-rules -->
-
-## This is NOT the Next.js you know
-
-This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
-
-This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
-
-<!-- END:nextjs-agent-rules -->
+```bash
+cd packages/archery_engine && dart test
+cd apps/arcus && flutter analyze && flutter test
+```

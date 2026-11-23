@@ -1,0 +1,144 @@
+openapi: 3.0.3
+info:
+  title: Arcus Content Sync API
+  version: 1.0.0
+  description: >
+    Versioned content feed for Arcus mobile clients. The website implements this
+    contract; the app ships with bundled offline content and optional pull sync.
+servers:
+  - url: https://api.example.com/v1
+    description: Replace with production host
+paths:
+  /manifest:
+    get:
+      summary: Content manifest with versions
+      parameters:
+        - in: query
+          name: since
+          schema:
+            type: string
+            format: date-time
+          required: false
+      responses:
+        "200":
+          description: Manifest
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Manifest"
+  /guides:
+    get:
+      summary: Educational guides
+      parameters:
+        - in: query
+          name: updated_since
+          schema:
+            type: string
+            format: date-time
+      responses:
+        "200":
+          description: Guide list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Guide"
+  /spine-charts:
+    get:
+      summary: Planning spine chart updates
+      responses:
+        "200":
+          description: Chart payloads
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/SpineChart"
+  /announcements:
+    get:
+      summary: In-app announcements
+      responses:
+        "200":
+          description: Announcements
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Announcement"
+components:
+  schemas:
+    Manifest:
+      type: object
+      required: [generated_at, guides_version, charts_version, announcements_version]
+      properties:
+        generated_at:
+          type: string
+          format: date-time
+        guides_version:
+          type: string
+        charts_version:
+          type: string
+        announcements_version:
+          type: string
+    Guide:
+      type: object
+      required: [id, title, body_markdown, updated_at]
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        body_markdown:
+          type: string
+        updated_at:
+          type: string
+          format: date-time
+        tags:
+          type: array
+          items:
+            type: string
+    SpineChart:
+      type: object
+      required: [id, name, version, bands]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        version:
+          type: string
+        bands:
+          type: array
+          items:
+            type: object
+            required: [max_effective_lb, spine]
+            properties:
+              max_effective_lb:
+                type: number
+              spine:
+                type: integer
+    Announcement:
+      type: object
+      required: [id, title, body, published_at]
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        body:
+          type: string
+        published_at:
+          type: string
+          format: date-time

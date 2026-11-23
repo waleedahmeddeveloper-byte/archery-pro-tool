@@ -1,31 +1,71 @@
-# Forge — Professional App Developer Studio
+# Arcus
 
-Forge is a readiness workspace for shipping production apps with Cursor Cloud Agents. It tracks loaded skills, connected MCP services, and a default Next.js stack.
+Offline-first professional archery calculators for **Android** and **iOS** (Flutter), with a pure-Dart calculation engine and optional website content sync.
 
-## What's included
+> Results are planning estimates. Chronograph, inspect, and tune equipment with a qualified professional before hunting or competition.
 
-- **Next.js 16** + TypeScript + Tailwind CSS + shadcn/ui
-- Inventory of **20 Cursor skills** (apps, Agent SDK, cloud ops)
-- Live **connector readiness** for Gmail, Drive, Sheets, Adspirer, GitHub, Origin, and more
+## What’s in this repo
 
-## Run locally
+| Path | Purpose |
+| --- | --- |
+| `apps/arcus` | Flutter application (Riverpod + GoRouter) |
+| `packages/archery_engine` | Pure-Dart formulas, charts helpers, citations, unit tests |
+| `docs/research` | Reference-site inventory (feature reference only) |
+| `docs/product` | IA / product spec |
+| `docs/design` | Design system |
+| `docs/api/openapi.yaml` | Content sync API contract for the website |
+| `docs/qa` | Test report & limitations |
+| `DECISIONS.md` | Package choice log |
+
+## Brand
+
+**Arcus** — spruce + brass design system (original; not copied from any reference site).
+
+## Quick start
 
 ```bash
-npm install
-npm run dev
+# Flutter SDK required (stable)
+export PATH="$PATH:$HOME/sdk/flutter/bin"   # or your install path
+
+# Engine tests
+cd packages/archery_engine && dart test
+
+# App
+cd ../../apps/arcus
+flutter pub get
+flutter run -d linux   # or chrome / android / ios
 ```
 
-Open [http://localhost:3847](http://localhost:3847).
+### Android release
 
-## Scripts
+```bash
+cd apps/arcus
+flutter build appbundle --release
+# APK: flutter build apk --release
+```
 
-| Command        | Purpose              |
-| -------------- | -------------------- |
-| `npm run dev`  | Dev server on 3847   |
-| `npm run build`| Production build     |
-| `npm run start`| Serve production     |
-| `npm run lint` | ESLint               |
+Configure signing in `android/key.properties` (not committed).
 
-## Next steps
+### iOS release
 
-Tell the agent what to build. Remaining connectors that still need auth (Google Calendar, X, X Ads, Crustdata, Adspirer Search Ads) can be finished from Cursor's connector prompts.
+```bash
+cd apps/arcus
+flutter build ipa --release
+```
+
+Open `ios/Runner.xcworkspace` in Xcode for signing, capabilities (ATT when ads enabled), and TestFlight upload.
+
+## Architecture
+
+- **Clean / feature-first** folders under `apps/arcus/lib/features`
+- **Engine** has zero Flutter dependencies
+- **Ads** behind `AdService` with `adsEnabled = false` and Google test IDs only
+- **Sync** mocked in-app; implement `docs/api/openapi.yaml` on the website
+
+## Safety & citations
+
+Every calculator result surfaces formula, steps, assumptions, limitations, safety notes, and a citation object from `archery_engine`.
+
+## License
+
+Proprietary — all rights reserved unless otherwise stated by the owner.
