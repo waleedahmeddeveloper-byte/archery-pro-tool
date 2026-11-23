@@ -122,7 +122,7 @@ export default function Home() {
               </h2>
               <p className="mt-2 max-w-2xl text-sm text-muted-foreground sm:text-base">
                 Approve any remaining auth prompts in Cursor to bring the last
-                services online. Google Drive and Sheets are already connected.
+                services online. Drive, Sheets, and X are already connected.
               </p>
             </div>
           </div>

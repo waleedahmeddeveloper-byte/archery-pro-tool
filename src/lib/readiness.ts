@@ -191,8 +191,8 @@ export const CONNECTORS: Connector[] = [
   {
     id: "x",
     name: "X",
-    status: "pending",
-    detail: "Approve the auth prompt to finish",
+    status: "ready",
+    detail: "@HafizWaleedDev",
     category: "social",
   },
   {
