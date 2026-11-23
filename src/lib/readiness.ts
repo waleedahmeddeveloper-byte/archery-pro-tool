@@ -164,7 +164,7 @@ export const CONNECTORS: Connector[] = [
     id: "google-calendar",
     name: "Google Calendar",
     status: "ready",
-    detail: "Events, availability, and schedules",
+    detail: "waleedahmaed.developer@gmail.com",
     category: "google",
   },
   {
