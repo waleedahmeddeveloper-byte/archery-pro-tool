@@ -13,6 +13,8 @@ CalcResult<double> pointWeightForTargetFoc({
 }) {
   requireFinitePositive('length', arrowLengthInches);
   requireFinitePositive('current total', currentTotalGrains);
+  requireFiniteNumber('current FOC %', currentFocPercent);
+  requireFiniteNumber('target FOC %', targetFocPercent);
 
   final L = arrowLengthInches;
   final currentA = (currentFocPercent / 100.0) * L + L / 2.0;

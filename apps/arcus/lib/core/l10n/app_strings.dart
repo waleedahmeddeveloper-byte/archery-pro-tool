@@ -25,12 +25,12 @@ abstract final class AppStrings {
   static const onboardingTitle1 = 'Build with confidence';
   static const onboardingBody1 =
       'Weigh, balance, and plan arrow setups with transparent formulas.';
-  static const onboardingTitle2 = 'One profile, every tool';
+  static const onboardingTitle2 = 'Guided Setup Assistant';
   static const onboardingBody2 =
-      'Save hunting and target rigs, then auto-fill any calculator.';
+      'Enter bow and arrow data once in the Assistant, then open detailed calculators for charts and FAQs.';
   static const onboardingTitle3 = 'Offline first';
   static const onboardingBody3 =
-      'Charts, guides, and math stay on-device. Sync updates when you choose.';
+      'Charts, guides, and math stay on-device. Optional content sync is mocked until a live API is connected.';
   static const getStarted = 'Get started';
   static const skip = 'Skip';
 }

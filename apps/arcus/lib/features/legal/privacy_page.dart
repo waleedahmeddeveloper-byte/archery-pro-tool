@@ -10,9 +10,9 @@ class PrivacyPage extends StatelessWidget {
       body: const SingleChildScrollView(
         padding: EdgeInsets.all(20),
         child: Text('''
-Arcus is designed offline-first. Calculator inputs and saved profiles stay on your device unless you explicitly enable content sync.
+Arcus is designed offline-first. Calculator inputs stay on your device (theme preference uses local storage). There is no cloud account for core calculators.
 
-When sync is enabled, the app may download non-personal content (guides, charts, announcements) from the Arcus content API. We do not require an account for core calculators.
+Optional content sync is not live yet; when enabled later, the app may fetch non-personal guides/charts from an Arcus content API.
 
 Advertising is disabled by default. If enabled later via AdMob, a consent (UMP/GDPR/ATT) flow will be shown before personalized ads. Analytics/crash reporting hooks may be added later and will be disclosed here before shipping.
 

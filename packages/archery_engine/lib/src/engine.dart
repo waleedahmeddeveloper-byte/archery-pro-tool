@@ -256,6 +256,15 @@ class ArcheryEngine {
   }) =>
       suggestDrawWeight(game: game, drawLengthInches: drawLengthInches);
 
+  CalcResult<double> grainsPerPound({
+    required double totalGrains,
+    required double drawWeightPounds,
+  }) =>
+      calculateGppResult(
+        totalGrains: totalGrains,
+        drawWeightPounds: drawWeightPounds,
+      );
+
   double convertWeightValue(double value, WeightUnit from, WeightUnit to) =>
       convertWeight(value, from, to);
 

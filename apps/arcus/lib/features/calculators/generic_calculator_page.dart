@@ -160,27 +160,11 @@ class _GenericCalculatorPageState extends State<GenericCalculatorPage> {
         );
         return (r, '${tip.toStringAsFixed(1)} gr front tip mass', null);
       case 'gpp':
-        final total = _d('total');
-        final draw = _d('draw');
-        final gpp = total / draw;
-        final r = CalcResult(
-          value: gpp,
-          formulaId: 'gpp',
-          formulaDisplay: 'GPP = total arrow grains ÷ draw weight (lb)',
-          steps: [
-            '${total.toStringAsFixed(1)} ÷ ${draw.toStringAsFixed(1)} = ${gpp.toStringAsFixed(2)} gpp',
-          ],
-          assumptions: const ['Use finished-arrow weight and peak draw weight.'],
-          limitations: const ['Manufacturer minimums override this number.'],
-          safetyNotes: [
-            if (gpp < 5) 'Below common 5 gpp safety floor — check your bow manual.',
-          ],
-          warnings: [
-            if (gpp < 5) 'GPP is below 5 — do not shoot until verified safe.',
-          ],
-          citation: Citations.gppSafety,
+        final r = _engine.grainsPerPound(
+          totalGrains: _d('total'),
+          drawWeightPounds: _d('draw'),
         );
-        return (r, '${gpp.toStringAsFixed(2)} gpp', null);
+        return (r, '${r.value.toStringAsFixed(2)} gpp', null);
       case 'point-foc':
         final r = _engine.pointWeightForFoc(
           arrowLengthInches: _d('length'),

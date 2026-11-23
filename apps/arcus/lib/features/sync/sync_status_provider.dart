@@ -15,7 +15,8 @@ class SyncStatusController extends StateNotifier<SyncStatus> {
     await Future<void>.delayed(const Duration(milliseconds: 600));
     state = SyncStatus(
       lastUpdatedLabel: DateTime.now().toUtc().toIso8601String(),
-      message: 'No remote updates (mock API). Bundled content unchanged.',
+      message:
+          'Mock sync only — no network call. Bundled offline content unchanged.',
     );
   }
 }

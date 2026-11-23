@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../features/assistant/setup_assistant_page.dart';
 import '../../features/calculators/generic_calculator_page.dart';
@@ -12,13 +11,13 @@ import '../../features/home/shell_scaffold.dart';
 import '../../features/onboarding/onboarding_page.dart';
 import '../../features/legal/privacy_page.dart';
 import '../../features/legal/terms_page.dart';
+import 'onboarding_gate.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     initialLocation: '/',
     redirect: (context, state) async {
-      final prefs = await SharedPreferences.getInstance();
-      final seen = prefs.getBool('arcus_onboarding_seen') ?? false;
+      final seen = await OnboardingGate.hasSeen();
       final onOnboarding = state.matchedLocation == '/onboarding';
       if (!seen && !onOnboarding) return '/onboarding';
       if (seen && onOnboarding) return '/';

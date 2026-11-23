@@ -40,26 +40,52 @@ class _CalculatorsTabState extends State<CalculatorsTab> {
             onChanged: (v) => setState(() => _query = v),
           ),
           const SizedBox(height: 16),
-          for (final entry in grouped.entries) ...[
-            Text(
-              CalculatorCatalog.categoryLabel(entry.key),
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w700,
+          if (filtered.isEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 48),
+              child: Column(
+                children: [
+                  Icon(
+                    Icons.search_off,
+                    size: 40,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
-            ),
-            const SizedBox(height: 8),
-            ...entry.value.map(
-              (item) => Card(
-                child: ListTile(
-                  title: Text(item.title),
-                  subtitle: Text(item.subtitle),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () => context.push(item.route),
+                  const SizedBox(height: 12),
+                  Text(
+                    'No tools match “$_query”.',
+                    style: Theme.of(context).textTheme.titleMedium,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Try FOC, spine, kinetic, or crossbow.',
+                    style: Theme.of(context).textTheme.bodySmall,
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            )
+          else
+            for (final entry in grouped.entries) ...[
+              Text(
+                CalculatorCatalog.categoryLabel(entry.key),
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+              ),
+              const SizedBox(height: 8),
+              ...entry.value.map(
+                (item) => Card(
+                  child: ListTile(
+                    title: Text(item.title),
+                    subtitle: Text(item.subtitle),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => context.push(item.route),
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 16),
-          ],
+              const SizedBox(height: 16),
+            ],
         ],
       ),
     );

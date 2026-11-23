@@ -49,3 +49,9 @@ void requireFinitePositive(String name, double value, {bool allowZero = false}) 
 void requireFiniteNonNegative(String name, double value) {
   requireFinitePositive(name, value, allowZero: true);
 }
+
+void requireFiniteNumber(String name, double value) {
+  if (value.isNaN || value.isInfinite) {
+    throw ValidationException('$name must be a finite number.');
+  }
+}

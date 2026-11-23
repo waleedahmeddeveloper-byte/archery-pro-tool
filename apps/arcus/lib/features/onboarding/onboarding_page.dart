@@ -1,8 +1,8 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:go_router/go_router.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/l10n/app_strings.dart';
+import '../../core/router/onboarding_gate.dart';
 import '../../core/theme/arcus_theme.dart';
 
 class OnboardingPage extends StatefulWidget {
@@ -17,8 +17,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
   int _index = 0;
 
   Future<void> _finish() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('arcus_onboarding_seen', true);
+    await OnboardingGate.markSeen();
     if (mounted) context.go('/');
   }
 

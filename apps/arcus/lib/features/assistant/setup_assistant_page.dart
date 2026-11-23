@@ -230,6 +230,8 @@ Assumptions: IBO→speed is an estimate; FOC here is component-based — measure
                     if (_step < 4) {
                       setState(() => _step++);
                       _page.jumpToPage(_step);
+                    } else {
+                      context.go('/');
                     }
                   },
                   child: Text(_step < 4 ? 'Next' : 'Done'),

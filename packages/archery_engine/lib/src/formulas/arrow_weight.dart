@@ -93,3 +93,40 @@ double calculateGpp({
   requireFinitePositive('draw weight', drawWeightPounds);
   return totalGrains / drawWeightPounds;
 }
+
+/// GPP with the same safety warnings used by [calculateArrowWeight].
+CalcResult<double> calculateGppResult({
+  required double totalGrains,
+  required double drawWeightPounds,
+  double minimumGpp = 5.0,
+}) {
+  final gpp = calculateGpp(
+    totalGrains: totalGrains,
+    drawWeightPounds: drawWeightPounds,
+  );
+  final warnings = <String>[];
+  if (gpp < minimumGpp) {
+    warnings.add(
+      'Calculated GPP (${gpp.toStringAsFixed(2)}) is below the ${minimumGpp.toStringAsFixed(0)} gpp safety floor. Check your bow manual.',
+    );
+  }
+  return CalcResult(
+    value: gpp,
+    formulaId: 'gpp',
+    formulaDisplay: 'GPP = total arrow grains ÷ draw weight (lb)',
+    steps: [
+      '${totalGrains.toStringAsFixed(1)} ÷ ${drawWeightPounds.toStringAsFixed(1)} = ${gpp.toStringAsFixed(2)} gpp',
+    ],
+    assumptions: const [
+      'Use finished-arrow weight and peak draw weight.',
+    ],
+    limitations: const [
+      'Manufacturer minimums override this number.',
+    ],
+    safetyNotes: [
+      'Never shoot below the bow manufacturer’s minimum arrow weight (often 5 gpp).',
+    ],
+    warnings: warnings,
+    citation: Citations.gppSafety,
+  );
+}

@@ -228,5 +228,44 @@ void main() {
       );
       expect(r.value, greaterThan(0));
     });
+
+    test('point FOC rejects NaN percents', () {
+      expect(
+        () => engine.pointWeightForFoc(
+          arrowLengthInches: 29,
+          currentTotalGrains: 420,
+          currentFocPercent: double.nan,
+          targetFocPercent: 14,
+        ),
+        throwsA(isA<ValidationException>()),
+      );
+    });
+  });
+
+  group('GPP validation', () {
+    test('420 gr @ 60 lb => 7 gpp', () {
+      final r = engine.grainsPerPound(
+        totalGrains: 420,
+        drawWeightPounds: 60,
+      );
+      expect(r.value, closeTo(7.0, 1e-9));
+      expect(r.warnings, isEmpty);
+    });
+
+    test('rejects zero draw weight', () {
+      expect(
+        () => engine.grainsPerPound(totalGrains: 420, drawWeightPounds: 0),
+        throwsA(isA<ValidationException>()),
+      );
+    });
+
+    test('warns below 5 gpp', () {
+      final r = engine.grainsPerPound(
+        totalGrains: 200,
+        drawWeightPounds: 60,
+      );
+      expect(r.value, closeTo(200 / 60, 1e-9));
+      expect(r.warnings, isNotEmpty);
+    });
   });
 }

@@ -1,7 +1,6 @@
 import 'dart:math' as math;
 
 import '../models/result.dart';
-import '../models/units.dart';
 import '../references/citations.dart';
 import 'energy.dart';
 

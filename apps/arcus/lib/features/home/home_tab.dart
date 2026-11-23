@@ -55,7 +55,7 @@ class HomeTab extends StatelessWidget {
                       ),
                       const SizedBox(height: 6),
                       const Text(
-                        'Enter bow and arrow data once. Reuse it across every calculator.',
+                        'Enter bow and arrow data once for a full performance summary, then open related calculators.',
                         style: TextStyle(color: Colors.white70),
                       ),
                       const SizedBox(height: 12),
