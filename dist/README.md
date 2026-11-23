@@ -8,5 +8,4 @@ If GitHub **Releases** downloads fail on your network, use the file in this fold
 
 Direct links:
 - Repo file: https://github.com/waleedahmeddeveloper-byte/archery-pro-tool/blob/main/dist/arcus-android.zip
-- Raw: https://github.com/waleedahmeddeveloper-byte/archery-pro-tool/raw/main/dist/arcus-android.zip
-- CDN mirror: https://cdn.jsdelivr.net/gh/waleedahmeddeveloper-byte/archery-pro-tool@main/dist/arcus-android.zip
+- Raw download: https://github.com/waleedahmeddeveloper-byte/archery-pro-tool/raw/main/dist/arcus-android.zip
