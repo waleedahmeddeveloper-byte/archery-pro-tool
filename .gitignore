@@ -20,8 +20,10 @@ node_modules/
 android/key.properties
 **/google-services.json
 **/GoogleService-Info.plist
-# Built binaries (copy from flutter build outputs when needed)
-dist/
+# Built binaries — allow tracked download zip under dist/
 *.apk
 *.aab
 *.ipa
+dist/*
+!dist/README.md
+!dist/arcus-android.zip

@@ -42,10 +42,17 @@ flutter run -d linux   # or chrome / android / ios
 
 ### Android release
 
-**Download Android build (v0.1.1):**
-- Phone-friendly ZIP: [arcus-android-v0.1.1.zip](https://github.com/waleedahmeddeveloper-byte/archery-pro-tool/releases/download/v0.1.1/arcus-android-v0.1.1.zip) (unzip → install `arcus-release.apk`)
-- Direct APK: [arcus-release.apk](https://github.com/waleedahmeddeveloper-byte/archery-pro-tool/releases/download/v0.1.1/arcus-release.apk)
-- Release page: [v0.1.1](https://github.com/waleedahmeddeveloper-byte/archery-pro-tool/releases/tag/v0.1.1)
+**Download Android build:**
+
+If Releases fail on your phone/network, use the **repo file** (most reliable):
+
+1. [dist/arcus-android.zip](https://github.com/waleedahmeddeveloper-byte/archery-pro-tool/blob/main/dist/arcus-android.zip) → click **Download raw file**
+2. Or open raw: https://github.com/waleedahmeddeveloper-byte/archery-pro-tool/raw/main/dist/arcus-android.zip
+3. Or CDN mirror: https://cdn.jsdelivr.net/gh/waleedahmeddeveloper-byte/archery-pro-tool@main/dist/arcus-android.zip
+
+Then unzip and install `arcus-release.apk`.
+
+Release assets (backup): [v0.1.1](https://github.com/waleedahmeddeveloper-byte/archery-pro-tool/releases/tag/v0.1.1)
 
 ```bash
 cd apps/arcus
