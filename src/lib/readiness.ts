@@ -163,8 +163,8 @@ export const CONNECTORS: Connector[] = [
   {
     id: "google-calendar",
     name: "Google Calendar",
-    status: "pending",
-    detail: "Approve the auth prompt to finish",
+    status: "ready",
+    detail: "Events, availability, and schedules",
     category: "google",
   },
   {
